@@ -3,7 +3,7 @@
   const kinds = window.fizzKinds;
   const comparatorText = { gt: 'above', gte: 'at or above', lt: 'below', lte: 'at or below' };
   const statusText = { watching: 'WATCHING', triggered: 'TRIGGERED', paused: 'PAUSED' };
-  const notifyNoun = { sms: 'Text', call: 'Call' };
+  const notifyNoun = { call: 'Call' };
   const freshMs = 15 * 60 * 1000;
   const eventPreview = 5;
   let timer = null;
@@ -121,15 +121,15 @@
     return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone || '';
   }
 
-  // How a triggered alert reached the owner's phone, if it was set to text or call.
+  // How a triggered alert reached the owner's phone.
   function notifyNote(event) {
     if (!notifyNoun[event.notify_channel]) return null;
     const noun = notifyNoun[event.notify_channel];
     const phone = formatPhone(event.notify_phone);
     const text = {
       pending: `${noun} to ${phone} queued`,
-      sending: event.notify_channel === 'call' ? `Calling ${phone}…` : `Texting ${phone}…`,
-      sent: event.notify_channel === 'call' ? `Called ${phone} ✓` : `Texted ${phone} ✓`,
+      sending: `Calling ${phone}…`,
+      sent: `Called ${phone} ✓`,
       failed: `${noun} to ${phone} failed${event.notify_error ? `: ${event.notify_error}` : ''}`,
       skipped: `${noun} skipped: sent one recently`,
     }[event.notify_status];
@@ -191,7 +191,7 @@
     const line = node('p', 'alert-line', `Alert when ${kinds.metricLabel(rule.metric)} is ${limitText(rule)}`);
     line.title = rule.metric;
     const meta = node('p', 'alert-meta');
-    if (notifyNoun[rule.notify_channel]) meta.append(node('span', 'notify', `${rule.notify_channel === 'call' ? 'Calls' : 'Texts'} ${formatPhone(rule.notify_phone)}`));
+    if (notifyNoun[rule.notify_channel]) meta.append(node('span', 'notify', `Calls ${formatPhone(rule.notify_phone)}`));
     const latest = sensor?.latest_reading;
     if (latest?.metric === rule.metric && typeof latest.numeric_value === 'number' && (latest.unit || '') === (rule.unit || '')) {
       const now = node('span', '', 'Now ');
@@ -317,7 +317,7 @@
       const rule = { sensor_id: $('alert-sensor').value, metric: $('alert-metric').value.trim(), comparator: $('alert-operator').value, threshold: Number($('alert-threshold').value), unit: $('alert-unit').value.trim() };
       if (notify !== 'none') Object.assign(rule, { notify_channel: notify, notify_phone: $('alert-phone').value.trim() });
       await api('/api/alerts', 'POST', rule);
-      $('alert-message').textContent = notify === 'none' ? 'Alert is active.' : `Alert is active. Fizz will ${notify === 'call' ? 'call' : 'text'} you when it triggers.`;
+      $('alert-message').textContent = notify === 'none' ? 'Alert is active.' : `Alert is active. Fizz will call you when it triggers.`;
       $('alert-threshold').value = '';
       await refresh();
     } catch (error) { $('alert-message').textContent = error.message; }

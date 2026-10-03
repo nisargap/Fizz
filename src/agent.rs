@@ -98,7 +98,7 @@ pub async fn alerts(request: Request) -> Response<ResponseBody> {
                         .unwrap_or("none")
                     {
                         "none" => {}
-                        channel @ ("sms" | "call") => {
+                        channel @ "call" => {
                             let Some(phone) = data
                                 .get("notify_phone")
                                 .and_then(Value::as_str)
@@ -117,7 +117,7 @@ pub async fn alerts(request: Request) -> Response<ResponseBody> {
                             return error(
                                 400,
                                 "invalid_notify",
-                                "Choose text, call, or no phone alert.",
+                                "Choose a phone call or dashboard-only alert.",
                             );
                         }
                     }
