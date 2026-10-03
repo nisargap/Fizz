@@ -7,7 +7,6 @@ const sensorNames = {
   pressure: 'Pressure', humidity: 'Humidity', sound: 'Sound', phone: 'Phone', custom: 'Custom',
 };
 let chosenKinds = [];
-let latestKind = null;
 
 function showError(message) {
   $('form-error').textContent = message;
@@ -73,40 +72,27 @@ function setupError(message) {
   $('setup-error').hidden = !message;
 }
 
-function renderSetup(showQuestion = false) {
-  const choosing = showQuestion || chosenKinds.length === 0;
+function renderSetup() {
   $('setup-loading').hidden = true;
-  $('sensor-question').hidden = !choosing;
-  $('setup-summary').hidden = choosing;
-  $('setup').setAttribute('aria-labelledby', choosing ? 'setup-title' : 'summary-title');
+  $('sensor-question').hidden = false;
   $('setup-retry').hidden = true;
   document.querySelectorAll('.sensor-card').forEach((card) => {
     card.setAttribute('aria-pressed', String(chosenKinds.includes(card.dataset.kind)));
   });
-  if (choosing) {
-    $('setup-title').focus();
-    return;
-  }
-  $('chosen-kind').textContent = sensorNames[latestKind || chosenKinds.at(-1)] || 'new';
-  $('choice-list').replaceChildren(...chosenKinds.map((kind) => {
-    const chip = document.createElement('span');
-    chip.className = 'choice-chip';
-    chip.textContent = sensorNames[kind];
-    return chip;
-  }));
-  $('summary-title').focus();
+  const count = chosenKinds.length;
+  $('selection-status').textContent = count === 0
+    ? 'No sensors selected yet'
+    : `${count} sensor ${count === 1 ? 'type' : 'types'} selected: ${chosenKinds.map((kind) => sensorNames[kind]).join(', ')}`;
 }
 
 async function loadSetup() {
   $('sensor-question').hidden = true;
-  $('setup-summary').hidden = true;
   $('setup-loading').hidden = false;
   $('setup-retry').hidden = true;
   setupError('');
   try {
     const state = await send('/api/setup', 'GET');
     chosenKinds = state.choices.filter((kind) => sensorNames[kind]);
-    latestKind = chosenKinds.at(-1) || null;
     renderSetup();
   } catch (error) {
     $('setup-loading').hidden = true;
@@ -167,12 +153,12 @@ $('back').addEventListener('click', () => { step = 1; render(); $('username').fo
 $('edit-username').addEventListener('click', () => { step = 1; render(); $('username').focus(); });
 document.querySelectorAll('.sensor-card').forEach((card) => card.addEventListener('click', async () => {
   const cards = document.querySelectorAll('.sensor-card');
+  const removing = chosenKinds.includes(card.dataset.kind);
   cards.forEach((item) => { item.disabled = true; });
   setupError('');
   try {
-    const state = await send('/api/setup', 'POST', { kind: card.dataset.kind });
+    const state = await send('/api/setup', removing ? 'DELETE' : 'POST', { kind: card.dataset.kind });
     chosenKinds = state.choices.filter((kind) => sensorNames[kind]);
-    latestKind = card.dataset.kind;
     renderSetup();
   } catch (error) {
     setupError(error.message);
@@ -180,7 +166,6 @@ document.querySelectorAll('.sensor-card').forEach((card) => card.addEventListene
     cards.forEach((item) => { item.disabled = false; });
   }
 }));
-$('choose-another').addEventListener('click', () => { setupError(''); renderSetup(true); });
 $('setup-retry').addEventListener('click', loadSetup);
 $('sign-out').addEventListener('click', async () => {
   try {
@@ -189,7 +174,6 @@ $('sign-out').addEventListener('click', async () => {
     $('account-panel').hidden = false;
     document.querySelector('.shell').classList.remove('setup-active');
     chosenKinds = [];
-    latestKind = null;
     setMode('sign-in');
   } catch { /* Keep the signed-in view if the server could not revoke the session. */ }
 });

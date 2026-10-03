@@ -253,6 +253,14 @@ pub async fn sensor_choices(request: Request) -> Response<ResponseBody> {
 }
 
 pub async fn select_sensor(request: Request) -> Response<ResponseBody> {
+    update_sensor(request, false).await
+}
+
+pub async fn remove_sensor(request: Request) -> Response<ResponseBody> {
+    update_sensor(request, true).await
+}
+
+async fn update_sensor(request: Request, removing: bool) -> Response<ResponseBody> {
     let Some(token) = session_token(&request) else {
         return error(401, "unauthorized", "Sign in to continue.");
     };
@@ -300,7 +308,11 @@ pub async fn select_sensor(request: Request) -> Response<ResponseBody> {
     };
     match store
         .rpc(
-            "fizz_add_sensor_choice",
+            if removing {
+                "fizz_remove_sensor_choice"
+            } else {
+                "fizz_add_sensor_choice"
+            },
             json!({"p_token": token, "p_kind": kind}),
         )
         .await

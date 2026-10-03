@@ -43,7 +43,7 @@ Open `/app.html` to create an account. Usernames are unique, case-insensitive, a
 
 Apply the migration with `supabase db push --project-ref <project-ref>`, then set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel. The browser calls only Fizz's `/api/onboarding`, `/api/session`, and `/api/me` endpoints; it never receives a Supabase key.
 
-After sign-in, `/app.html` shows Fizz and a sensor type picker. Water, Gas, Radio, Temperature, Pressure, Humidity, Sound, Phone, and Custom are saved per customer through `GET`/`POST /api/setup`. These are setup choices, not connected devices; the page says so until a pairing flow is built.
+After sign-in, `/app.html` shows Fizz and a sensor type picker. Customers can select and remove Water, Gas, Radio, Temperature, Pressure, Humidity, Sound, Phone, and Custom on the same screen. Choices are saved per customer through `GET`/`POST`/`DELETE /api/setup`. These are setup choices, not connected devices; the page says so until a pairing flow is built.
 
 ## Supabase Compute
 

@@ -53,7 +53,8 @@ input::placeholder { color: #7b9daa; }
 .sensor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .sensor-card { display: grid; grid-template-columns: 60px 1fr; grid-template-rows: auto auto; align-items: center; column-gap: .85rem; min-height: 112px; text-align: left; border: 2px solid #47778a; background: #0b2231; color: #f4f9fa; padding: .85rem; box-shadow: 5px 5px 0 #071724; transition: transform .12s steps(2, end), box-shadow .12s steps(2, end), border-color .12s; }
 .sensor-card:hover, .sensor-card:focus-visible { transform: translate(-3px, -3px); box-shadow: 8px 8px 0 #071724; border-color: var(--sensor-color); }
-.sensor-card[aria-pressed="true"] { border-color: var(--sensor-color); background: #173747; }
+.sensor-card[aria-pressed="true"] { border-color: var(--sensor-color); background: #173747; box-shadow: 5px 5px 0 var(--sensor-color); }
+.sensor-card[aria-pressed="true"]::after { content: "✓ SELECTED"; grid-column: 2; color: var(--sensor-color); font-size: 1.05rem; letter-spacing: .04em; }
 .sensor-icon { grid-row: 1 / 3; width: 58px; height: 58px; display: grid; place-items: center; border: 2px solid var(--sensor-color); background: #102b39; color: var(--sensor-color); box-shadow: 3px 3px 0 #071724; }
 .sensor-icon svg { width: 36px; height: 36px; fill: currentColor; }
 .sensor-icon .icon-cutout { fill: #102b39; }
@@ -61,9 +62,8 @@ input::placeholder { color: #7b9daa; }
 .sensor-detail { color: #bdd5dc; font-size: 1.12rem; line-height: 1; align-self: start; margin-top: .3rem; }
 .setup-error { margin: 1.4rem auto 0; padding: .4rem .7rem; max-width: 600px; border-left: 3px solid #ffb9af; color: #ffb9af; font-size: 1.35rem; text-align: center; }
 .setup-retry { display: block; margin: 1rem auto 0; }
-.choice-list { display: flex; flex-wrap: wrap; justify-content: center; gap: .65rem; margin: 1.5rem auto; }
-.choice-chip { display: inline-block; border: 2px solid #7abed0; background: #0b2231; color: #a9eaf7; padding: .4rem .7rem; font-size: 1.35rem; }
-.choose-another { display: block; margin: 1.3rem auto .2rem; }
+.selection-status { color: #a9eaf7; font-size: 1.5rem; line-height: 1.1; text-align: center; margin: 1.8rem auto .4rem; }
+.selection-note { color: #bdd5dc; font-size: 1.15rem; text-align: center; margin: 0; }
 @keyframes agent-bob { 50% { transform: translateY(-6px); } }
 @media (max-width: 760px) {
   .sensor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
@@ -81,6 +81,7 @@ input::placeholder { color: #7b9daa; }
   .agent-stage { width: 145px; height: 125px; }
   .agent-mascot { width: 115px; height: 115px; }
   .sensor-card { display: flex; flex-direction: column; align-items: flex-start; min-height: 116px; gap: .22rem; }
+  .sensor-card[aria-pressed="true"]::after { font-size: .9rem; }
   .sensor-icon { margin-bottom: .2rem; }
   .sensor-name, .sensor-detail { align-self: auto; }
   .sensor-name { font-size: 1.5rem; }

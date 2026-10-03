@@ -70,7 +70,7 @@
       <div id="sensor-question">
         <p class="setup-eyebrow">01 / GIVE FIZZ ITS SENSES</p>
         <h1 class="setup-title" id="setup-title" tabindex="-1">What type of sensors do you want to give Fizz?</h1>
-        <p class="setup-intro">Pick a type to start. Fizz will help you connect the real sensor later.</p>
+        <p class="setup-intro">Choose any sensors you want. Tap a selected card to remove it.</p>
         <div class="sensor-grid" role="group" aria-label="Sensor types">
           <button class="sensor-card" type="button" data-kind="water" style="--sensor-color:#8de5f2">
             <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M7 1h2v2h2v3h2v2h1v4h-1v2h-2v1H5v-1H3v-2H2V8h1V6h2V3h2z"/><path class="icon-cutout" d="M5 9h2v4H5z"/></svg></span><span class="sensor-name">Water</span><span class="sensor-detail">Leaks &amp; flow</span>
@@ -100,13 +100,8 @@
             <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M7 2h2v5h5v2H9v5H7V9H2V7h5z"/><path d="M2 2h2v2H2zm10 0h2v2h-2zM2 12h2v2H2zm10 0h2v2h-2z"/></svg></span><span class="sensor-name">Custom</span><span class="sensor-detail">Your idea</span>
           </button>
         </div>
-      </div>
-      <div id="setup-summary" hidden>
-        <p class="setup-eyebrow">01 / SENSOR TYPE SAVED</p>
-        <h1 class="setup-title" id="summary-title" tabindex="-1">Fizz is ready to meet your <span id="chosen-kind"></span> sensor.</h1>
-        <p class="setup-intro">Your choice is saved. No physical sensor is connected yet.</p>
-        <div class="choice-list" id="choice-list" aria-label="Chosen sensor types"></div>
-        <button class="primary choose-another" id="choose-another" type="button">Choose another type <span aria-hidden="true">→</span></button>
+        <p class="selection-status" id="selection-status" role="status" aria-live="polite">No sensors selected yet</p>
+        <p class="selection-note">Your choices save automatically. Fizz will help you connect real sensors later.</p>
       </div>
       <p class="setup-error" id="setup-error" role="alert" hidden></p>
       <button class="secondary setup-retry" id="setup-retry" type="button" hidden>Try again</button>
