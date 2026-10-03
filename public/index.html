@@ -3,24 +3,87 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#101820">
+    <meta name="theme-color" content="#0b1722">
     <title>Fizz — The physical layer for AI agents</title>
-    <meta name="description" content="Fizz is the physical layer for AI agents.">
+    <meta name="description" content="Meet Fizz, the physical layer for AI agents.">
     <style>
       :root { color-scheme: dark; font-family: system-ui, sans-serif; }
-      body { min-height: 100vh; margin: 0; display: grid; place-items: center; background: #101820; color: #f4f5ef; }
-      main { width: min(36rem, calc(100% - 3rem)); }
-      h1 { margin: 0; font-size: clamp(4rem, 14vw, 8rem); letter-spacing: -.07em; line-height: 1; }
-      p { margin: 1.5rem 0 2rem; font-size: clamp(1.25rem, 4vw, 1.7rem); line-height: 1.4; color: #b9c8c4; }
-      a { color: #101820; background: #baff70; padding: .8rem 1rem; border-radius: .4rem; font-weight: 650; text-decoration: none; }
+      * { box-sizing: border-box; }
+      body {
+        min-height: 100vh; margin: 0; display: grid; place-items: center; overflow-x: hidden;
+        background: radial-gradient(circle at 68% 38%, #183e52 0, #102938 32%, #0b1722 75%); color: #f4f9fa;
+      }
+      main { width: min(1100px, calc(100% - 3rem)); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(2rem, 5vw, 5rem); }
+      .copy { position: relative; z-index: 1; }
+      .eyebrow { margin: 0 0 1rem; color: #9ce6f7; font-size: .78rem; font-weight: 750; letter-spacing: .22em; text-transform: uppercase; }
+      h1 { margin: 0; font-size: clamp(5rem, 13vw, 10rem); letter-spacing: -.075em; line-height: .9; }
+      .tagline { max-width: 26rem; margin: 1.8rem 0 2.5rem; font-size: clamp(1.25rem, 2.4vw, 1.85rem); line-height: 1.4; color: #bdd5dc; }
+      a { display: inline-block; color: #0b1722; background: #a9eaf7; padding: .85rem 1.15rem; border-radius: .45rem; font-weight: 700; text-decoration: none; }
+      a:hover { background: #d1f7ff; }
       a:focus-visible { outline: 3px solid white; outline-offset: 4px; }
+      .stage { position: relative; display: grid; place-items: center; min-height: 480px; isolation: isolate; }
+      .stage::before { content: ""; position: absolute; z-index: -1; width: min(100%, 490px); aspect-ratio: 1; border: 1px solid #77cfe047; border-radius: 50%; box-shadow: 0 0 0 28px #77cfe00b, 0 0 0 72px #77cfe008; }
+      .stage::after { content: ""; position: absolute; bottom: 4%; width: 62%; height: 25px; border-radius: 50%; background: #030e17; filter: blur(10px); animation: shadow 3s ease-in-out infinite; }
+      .mascot-runner { width: min(100%, 450px); animation: scurry 3s ease-in-out infinite; }
+      .mascot { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 20px 28px #040d18a8); image-rendering: pixelated; }
+      .tentacle-left { animation: step-left .3s steps(2, end) infinite alternate; }
+      .tentacle-right { animation: step-right .3s steps(2, end) infinite alternate; }
+      .spark { fill: #d7fbff; animation: twinkle 2s steps(2, end) infinite alternate; }
+      .spark:nth-of-type(2) { animation-delay: .7s; }
+      @keyframes scurry { 0%, 100% { transform: translate(-18px, 0) rotate(-2deg); } 50% { transform: translate(18px, -9px) rotate(2deg); } }
+      @keyframes step-left { to { transform: translateY(5px); } }
+      @keyframes step-right { to { transform: translateY(-5px); } }
+      @keyframes shadow { 50% { transform: scale(.85); opacity: .65; } }
+      @keyframes twinkle { to { opacity: .25; } }
+      @media (max-width: 720px) {
+        main { grid-template-columns: 1fr; gap: 0; padding: 4rem 0 3rem; text-align: center; }
+        .stage { grid-row: 1; min-height: 310px; }
+        .mascot-runner { width: min(76vw, 320px); }
+        .copy { grid-row: 2; }
+        .tagline { margin: 1.2rem auto 2rem; }
+        .stage::after { bottom: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .mascot-runner, .tentacle-left, .tentacle-right, .stage::after, .spark { animation: none; }
+      }
     </style>
   </head>
   <body>
     <main>
-      <h1>Fizz.</h1>
-      <p>The physical layer for AI agents.</p>
-      <a href="/api/status">API status</a>
+      <div class="copy">
+        <p class="eyebrow">Meet your new sidekick</p>
+        <h1>Fizz.</h1>
+        <p class="tagline">The physical layer for AI agents.</p>
+        <a href="/api/status">Explore the API</a>
+      </div>
+      <div class="stage">
+        <div class="mascot-runner">
+          <svg class="mascot" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fizz-title fizz-desc" shape-rendering="crispEdges">
+            <title id="fizz-title">Fizz the pixel mascot</title>
+            <desc id="fizz-desc">A friendly light blue creature with bright eyes and four little scurrying tentacles.</desc>
+            <path class="spark" d="M8 17h3v-3h2v3h3v2h-3v3h-2v-3H8z"/>
+            <path class="spark" d="M66 8h2V5h2v3h3v2h-3v3h-2v-3h-2z"/>
+            <path class="spark" d="M70 48h3v-3h2v3h3v2h-3v3h-2v-3h-3z"/>
+            <g class="tentacle-left" fill="#599cb5">
+              <path d="M22 52h10v10h-3v8h-8v-5h-3v-6h4z"/>
+              <path d="M43 54h9v11h-3v6h-8v-5h-3v-7h5z"/>
+            </g>
+            <g class="tentacle-right" fill="#80d7e9">
+              <path d="M32 55h9v9h-3v8h-8v-6h-3v-7h5z"/>
+              <path d="M53 52h8v8h-3v9h-8v-6h-3v-7h6z"/>
+            </g>
+            <path fill="#387991" d="M24 10h32v3h8v5h5v8h3v23h-3v7h-5v5h-8v3H24v-3h-8v-5h-5v-7H8V26h3v-8h5v-5h8z"/>
+            <path fill="#a9eaf7" d="M24 13h32v3h8v5h4v8h3v17h-3v8h-5v5h-8v3H25v-3h-8v-5h-5v-8H9V29h3v-8h5v-5h7z"/>
+            <path fill="#d8f9ff" d="M24 16h25v3H22v3h-5v5h-4v13h-1V29h3v-8h6v-3h3z"/>
+            <path fill="#82d4e9" d="M61 25h5v6h3v15h-3v7h-5v5h-8v3H30v-3h23v-3h8v-5h4v-8h2V31h-6z"/>
+            <path fill="#eefeff" d="M22 33h13v3h3v10h-3v3H22v-3h-3V36h3zm23 0h13v3h3v10h-3v3H45v-3h-3V36h3z"/>
+            <path fill="#153849" d="M27 36h5v10h-5zm23 0h5v10h-5z"/>
+            <path fill="#fff" d="M28 37h2v3h-2zm23 0h2v3h-2z"/>
+            <path fill="#ef9faf" d="M15 47h7v3h-7zm43 0h7v3h-7z" opacity=".7"/>
+            <path fill="#326d82" d="M36 51h8v2h-2v2h-4v-2h-2z"/>
+          </svg>
+        </div>
+      </div>
     </main>
   </body>
 </html>
