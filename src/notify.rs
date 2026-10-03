@@ -156,26 +156,33 @@ struct Twilio {
 }
 
 impl Twilio {
-    fn from_env() -> Option<Self> {
+    fn from_env() -> Result<Self, &'static str> {
         let read = |name: &str| {
             env::var(name)
                 .ok()
                 .map(|v| v.trim().to_owned())
                 .filter(|v| !v.is_empty())
         };
-        let user = read("TWILIO_SID")?;
-        let secret = read("TWILIO_CLIENT_SECRET")?;
+        let user = read("TWILIO_SID").ok_or("TWILIO_SID is missing or empty.")?;
+        let secret =
+            read("TWILIO_CLIENT_SECRET").ok_or("TWILIO_CLIENT_SECRET is missing or empty.")?;
         // TWILIO_SID may be the Account SID itself, or an API key SID used with TWILIO_ACCOUNT_SID.
         let account = if user.starts_with("AC") {
             user.clone()
+        } else if user.starts_with("SK") {
+            read("TWILIO_ACCOUNT_SID")
+                .filter(|sid| sid.starts_with("AC"))
+                .ok_or(
+                    "TWILIO_SID is an API key; TWILIO_ACCOUNT_SID must contain its AC account SID.",
+                )?
         } else {
-            read("TWILIO_ACCOUNT_SID").filter(|sid| sid.starts_with("AC"))?
+            return Err("TWILIO_SID must be an AC account SID or an SK API key SID.");
         };
         let client = Client::builder()
             .timeout(Duration::from_secs(8))
             .build()
-            .ok()?;
-        Some(Self {
+            .map_err(|_| "Could not initialize the Twilio HTTP client.")?;
+        Ok(Self {
             client,
             account,
             user,
@@ -279,14 +286,24 @@ impl Twilio {
 /// notification goes out on the same request that triggered it. Failures never affect ingestion.
 pub async fn dispatch(store: &Supabase) {
     // Skip claiming when Twilio is not configured, e.g. on preview deployments sharing the database.
-    let Some(mut twilio) = Twilio::from_env() else {
-        return;
+    let mut twilio = match Twilio::from_env() {
+        Ok(twilio) => twilio,
+        Err(reason) => {
+            if env::var("VERCEL_ENV").as_deref() == Ok("production") {
+                eprintln!("Fizz alert notifications disabled: {reason}");
+            }
+            return;
+        }
     };
-    let Ok(batch) = store
+    let batch = match store
         .rpc("fizz_claim_alert_notifications", json!({"p_limit":3}))
         .await
-    else {
-        return;
+    {
+        Ok(batch) => batch,
+        Err(problem) => {
+            eprintln!("Fizz alert notification queue could not be claimed: {problem:?}");
+            return;
+        }
     };
     for alert in batch.as_array().into_iter().flatten() {
         let Some(id) = alert.get("id").and_then(Value::as_str) else {
@@ -302,12 +319,15 @@ pub async fn dispatch(store: &Supabase) {
         if let Some(message) = &problem {
             eprintln!("Fizz alert notification {id} failed: {message}");
         }
-        let _ = store
+        if let Err(problem) = store
             .rpc(
                 "fizz_finish_alert_notification",
                 json!({"p_event_id":id,"p_sent":sent,"p_retry":retry,"p_error":problem}),
             )
-            .await;
+            .await
+        {
+            eprintln!("Fizz alert notification {id} status could not be saved: {problem:?}");
+        }
     }
 }
 
