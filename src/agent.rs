@@ -174,7 +174,7 @@ fn valid_proposal(proposal: &Value, context: &Value) -> bool {
                 list.iter().any(|r| {
                     r.get("sensor_id").and_then(Value::as_str) == Some(sensor_id)
                         && r.get("metric").and_then(Value::as_str) == Some(metric)
-                        && r.get("unit").and_then(Value::as_str) == Some(unit)
+                        && r.get("unit").and_then(Value::as_str).unwrap_or("") == unit
                         && r.get("numeric_value").and_then(Value::as_f64).is_some()
                 })
             })
