@@ -26,3 +26,7 @@ path = "api/session.rs"
 [[bin]]
 name = "me"
 path = "api/me.rs"
+
+[[bin]]
+name = "setup"
+path = "api/setup.rs"

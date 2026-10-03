@@ -22,12 +22,6 @@
     <a class="brand" href="/" aria-label="Fizz home">Fizz<span>.</span></a>
     <section class="panel" id="account-panel" aria-labelledby="auth-title">
       <div class="panel-top"><span>FIZZ // CUSTOMER ACCESS</span><span id="step-label">01 / 02</span></div>
-      <div id="welcome" hidden>
-        <p class="eyebrow">Workspace access</p>
-        <h1 id="panel-title" tabindex="-1">You're in, <span id="welcome-name"></span>.</h1>
-        <p class="intro">Your account is ready. The device dashboard is coming next.</p>
-        <button class="secondary" id="sign-out" type="button">Sign out</button>
-      </div>
       <div id="auth">
         <p class="eyebrow">Secure workspace setup</p>
         <h1 id="auth-title">Create your access</h1>
@@ -59,6 +53,63 @@
           </div>
         </form>
       </div>
+    </section>
+    <section class="setup-screen" id="setup" aria-labelledby="setup-title" hidden>
+      <header class="setup-bar">
+        <span>FIZZ // SENSOR SETUP</span>
+        <div class="setup-account"><span id="setup-username"></span><button class="setup-sign-out" id="sign-out" type="button">Sign out</button></div>
+      </header>
+      <div class="agent-guide">
+        <div class="agent-stage" aria-hidden="true">
+          <div class="agent-halo"></div>
+          <img class="agent-mascot" src="/fizz-agent.svg" alt="">
+        </div>
+        <p>YOUR AGENT // FIZZ</p>
+      </div>
+      <p class="setup-intro" id="setup-loading" role="status" hidden>Loading your setup...</p>
+      <div id="sensor-question">
+        <p class="setup-eyebrow">01 / GIVE FIZZ ITS SENSES</p>
+        <h1 class="setup-title" id="setup-title" tabindex="-1">What type of sensors do you want to give Fizz?</h1>
+        <p class="setup-intro">Pick a type to start. Fizz will help you connect the real sensor later.</p>
+        <div class="sensor-grid" role="group" aria-label="Sensor types">
+          <button class="sensor-card" type="button" data-kind="water" style="--sensor-color:#8de5f2">
+            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M7 1h2v2h2v3h2v2h1v4h-1v2h-2v1H5v-1H3v-2H2V8h1V6h2V3h2z"/><path class="icon-cutout" d="M5 9h2v4H5z"/></svg></span><span class="sensor-name">Water</span><span class="sensor-detail">Leaks &amp; flow</span>
+          </button>
+          <button class="sensor-card" type="button" data-kind="gas" style="--sensor-color:#b8dfa4">
+            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M5 4h6v2h2v2h2v4h-2v2H3v-2H1V8h2V6h2z"/><path class="icon-cutout" d="M6 7h2v2H6zm3 3h2v2H9z"/></svg></span><span class="sensor-name">Gas</span><span class="sensor-detail">Air safety</span>
+          </button>
+          <button class="sensor-card" type="button" data-kind="radio" style="--sensor-color:#f1d198">
+            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M7 7h2v7H7zM5 14h6v1H5zM3 5h2v2H3zm8 0h2v2h-2zM1 2h2v3H1zm12 0h2v3h-2zM5 3h2v2H5zm4 0h2v2H9z"/></svg></span><span class="sensor-name">Radio</span><span class="sensor-detail">Signals &amp; waves</span>
+          </button>
+          <button class="sensor-card" type="button" data-kind="temperature" style="--sensor-color:#f3ad8b">
+            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M6 1h4v9h2v4h-2v1H6v-1H4v-4h2z"/><path class="icon-cutout" d="M7 3h2v7H7z"/></svg></span><span class="sensor-name">Temperature</span><span class="sensor-detail">Hot &amp; cold</span>
+          </button>
+          <button class="sensor-card" type="button" data-kind="pressure" style="--sensor-color:#bdbaef">
+            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M4 2h8v2h2v8h-2v2H4v-2H2V4h2z"/><path class="icon-cutout" d="M5 5h6v6H5z"/><path d="M7 7h2v5H7zM9 6h2v2H9z"/></svg></span><span class="sensor-name">Pressure</span><span class="sensor-detail">Force &amp; level</span>
+          </button>
+          <button class="sensor-card" type="button" data-kind="humidity" style="--sensor-color:#96d6d8">
+            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M4 1h2v2h2v3h1v3H8v2H6v-2H4V6H3V3h1zm7 5h2v2h1v3h-1v2h-2v-2h-1V8h1zM2 13h2v2H2zm4 0h2v2H6z"/></svg></span><span class="sensor-name">Humidity</span><span class="sensor-detail">Moisture</span>
+          </button>
+          <button class="sensor-card" type="button" data-kind="sound" style="--sensor-color:#eecb96">
+            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M2 6h3V4h2V2h2v12H7v-2H5v-2H2zM10 6h2v4h-2zm3-3h2v10h-2z"/></svg></span><span class="sensor-name">Sound</span><span class="sensor-detail">Audio events</span>
+          </button>
+          <button class="sensor-card" type="button" data-kind="phone" style="--sensor-color:#a7c8ed">
+            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M4 1h8v14H4z"/><path class="icon-cutout" d="M5 3h6v9H5z"/><path d="M7 13h2v1H7z"/></svg></span><span class="sensor-name">Phone</span><span class="sensor-detail">Mobile signals</span>
+          </button>
+          <button class="sensor-card" type="button" data-kind="custom" style="--sensor-color:#c8d9ee">
+            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M7 2h2v5h5v2H9v5H7V9H2V7h5z"/><path d="M2 2h2v2H2zm10 0h2v2h-2zM2 12h2v2H2zm10 0h2v2h-2z"/></svg></span><span class="sensor-name">Custom</span><span class="sensor-detail">Your idea</span>
+          </button>
+        </div>
+      </div>
+      <div id="setup-summary" hidden>
+        <p class="setup-eyebrow">01 / SENSOR TYPE SAVED</p>
+        <h1 class="setup-title" id="summary-title" tabindex="-1">Fizz is ready to meet your <span id="chosen-kind"></span> sensor.</h1>
+        <p class="setup-intro">Your choice is saved. No physical sensor is connected yet.</p>
+        <div class="choice-list" id="choice-list" aria-label="Chosen sensor types"></div>
+        <button class="primary choose-another" id="choose-another" type="button">Choose another type <span aria-hidden="true">→</span></button>
+      </div>
+      <p class="setup-error" id="setup-error" role="alert" hidden></p>
+      <button class="secondary setup-retry" id="setup-retry" type="button" hidden>Try again</button>
     </section>
   </main>
 </body>

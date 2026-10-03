@@ -43,6 +43,8 @@ Open `/app.html` to create an account. Usernames are unique, case-insensitive, a
 
 Apply the migration with `supabase db push --project-ref <project-ref>`, then set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel. The browser calls only Fizz's `/api/onboarding`, `/api/session`, and `/api/me` endpoints; it never receives a Supabase key.
 
+After sign-in, `/app.html` shows Fizz and a sensor type picker. Water, Gas, Radio, Temperature, Pressure, Humidity, Sound, Phone, and Custom are saved per customer through `GET`/`POST /api/setup`. These are setup choices, not connected devices; the page says so until a pairing flow is built.
+
 ## Supabase Compute
 
 `supabase/config.toml` enables experimental Compute. The private `fizz-worker` service lives in `supabase/compute/fizz-worker/` and runs a small Rust health server. It uses one 2 GB, 1 vCPU instance; no public URL is exposed. It is ready for future background or device work, but the Vercel app does not call it yet.

@@ -222,3 +222,99 @@ pub async fn sign_out(request: Request) -> Response<ResponseBody> {
     }
     reply(200, json!({"ok": true}), Some(clear_cookie()))
 }
+
+pub async fn sensor_choices(request: Request) -> Response<ResponseBody> {
+    let Some(token) = session_token(&request) else {
+        return error(401, "unauthorized", "Sign in to continue.");
+    };
+    let Ok(store) = Supabase::from_env() else {
+        return error(
+            503,
+            "database_unavailable",
+            "Sensor setup is temporarily unavailable.",
+        );
+    };
+    match store
+        .rpc("fizz_get_sensor_choices", json!({"p_token": token}))
+        .await
+    {
+        Ok(value) if value.get("error").and_then(Value::as_str) == Some("unauthorized") => {
+            error(401, "unauthorized", "Sign in to continue.")
+        }
+        Ok(value) if value.get("choices").and_then(Value::as_array).is_some() => {
+            reply(200, value, None)
+        }
+        _ => error(
+            503,
+            "database_unavailable",
+            "Sensor setup is temporarily unavailable.",
+        ),
+    }
+}
+
+pub async fn select_sensor(request: Request) -> Response<ResponseBody> {
+    let Some(token) = session_token(&request) else {
+        return error(401, "unauthorized", "Sign in to continue.");
+    };
+    let is_json = request
+        .headers()
+        .get("content-type")
+        .and_then(|value| value.to_str().ok())
+        .is_some_and(|value| value.starts_with("application/json"));
+    if !is_json {
+        return error(415, "unsupported_media_type", "Send JSON.");
+    }
+    let bytes = match Limited::new(request.into_body(), 512).collect().await {
+        Ok(body) => body.to_bytes(),
+        Err(_) => return error(413, "invalid_request", "Request is too large."),
+    };
+    let data: Value = match serde_json::from_slice(&bytes) {
+        Ok(value) => value,
+        Err(_) => return error(400, "invalid_request", "Choose a sensor type."),
+    };
+    let kind = data.get("kind").and_then(Value::as_str).unwrap_or("");
+    if !matches!(
+        kind,
+        "water"
+            | "gas"
+            | "radio"
+            | "temperature"
+            | "pressure"
+            | "humidity"
+            | "sound"
+            | "phone"
+            | "custom"
+    ) {
+        return error(
+            400,
+            "invalid_kind",
+            "Choose one of the listed sensor types.",
+        );
+    }
+    let Ok(store) = Supabase::from_env() else {
+        return error(
+            503,
+            "database_unavailable",
+            "Sensor setup is temporarily unavailable.",
+        );
+    };
+    match store
+        .rpc(
+            "fizz_add_sensor_choice",
+            json!({"p_token": token, "p_kind": kind}),
+        )
+        .await
+    {
+        Ok(value) if value.get("error").and_then(Value::as_str) == Some("unauthorized") => {
+            error(401, "unauthorized", "Sign in to continue.")
+        }
+        Ok(value) if value.get("choices").and_then(Value::as_array).is_some() => {
+            reply(200, value, None)
+        }
+        _ => error(
+            503,
+            "database_unavailable",
+            "Sensor setup is temporarily unavailable.",
+        ),
+    }
+}
