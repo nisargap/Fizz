@@ -14,7 +14,7 @@
       * { box-sizing: border-box; }
       body {
         min-height: 100vh; margin: 0; display: grid; place-items: center; overflow-x: hidden;
-        background: radial-gradient(circle at 68% 38%, #183e52 0, #102938 32%, #0b1722 75%); color: #f4f9fa;
+        background: #0b1722; color: #f4f9fa;
       }
       main { width: min(1100px, calc(100% - 3rem)); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(2rem, 5vw, 5rem); }
       .copy { position: relative; z-index: 1; }
@@ -25,10 +25,9 @@
       a:hover { background: #d1f7ff; }
       a:focus-visible { outline: 3px solid white; outline-offset: 4px; }
       .stage { position: relative; display: grid; place-items: center; min-height: 480px; isolation: isolate; }
-      .stage::before { content: ""; position: absolute; z-index: -1; width: min(100%, 490px); aspect-ratio: 1; border: 1px solid #77cfe047; border-radius: 50%; box-shadow: 0 0 0 28px #77cfe00b, 0 0 0 72px #77cfe008; }
-      .stage::after { content: ""; position: absolute; bottom: 4%; width: 62%; height: 25px; border-radius: 50%; background: #030e17; filter: blur(10px); animation: shadow 3s ease-in-out infinite; }
+      .pixel-halo { position: absolute; z-index: -1; width: min(100%, 490px); height: auto; image-rendering: pixelated; }
       .mascot-runner { width: min(100%, 450px); animation: scurry 3s ease-in-out infinite; }
-      .mascot { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 20px 28px #040d18a8); image-rendering: pixelated; }
+      .mascot { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(8px 12px 0 #071724); image-rendering: pixelated; }
       .tentacle-left { animation: step-left .3s steps(2, end) infinite alternate; }
       .tentacle-right { animation: step-right .3s steps(2, end) infinite alternate; }
       .spark { fill: #d7fbff; animation: twinkle 2s steps(2, end) infinite alternate; }
@@ -36,7 +35,6 @@
       @keyframes scurry { 0%, 100% { transform: translate(-18px, 0) rotate(-2deg); } 50% { transform: translate(18px, -9px) rotate(2deg); } }
       @keyframes step-left { to { transform: translateY(5px); } }
       @keyframes step-right { to { transform: translateY(-5px); } }
-      @keyframes shadow { 50% { transform: scale(.85); opacity: .65; } }
       @keyframes twinkle { to { opacity: .25; } }
       @media (max-width: 720px) {
         main { grid-template-columns: 1fr; gap: 0; padding: 4rem 0 3rem; text-align: center; }
@@ -44,10 +42,9 @@
         .mascot-runner { width: min(76vw, 320px); }
         .copy { grid-row: 2; }
         .tagline { margin: 1.2rem auto 2rem; }
-        .stage::after { bottom: 0; }
       }
       @media (prefers-reduced-motion: reduce) {
-        .mascot-runner, .tentacle-left, .tentacle-right, .stage::after, .spark { animation: none; }
+        .mascot-runner, .tentacle-left, .tentacle-right, .spark { animation: none; }
       }
     </style>
   </head>
@@ -60,6 +57,11 @@
         <a href="/api/status">Explore the API</a>
       </div>
       <div class="stage">
+        <svg class="pixel-halo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" shape-rendering="crispEdges">
+          <path fill="#122d3d" d="M28 2h44v4h12v4h6v6h4v12h4v44h-4v12h-4v6h-6v4H72v4H28v-4H16v-4h-6v-6H6V72H2V28h4V16h4v-6h6V6h12z"/>
+          <path fill="#1a4050" d="M28 10h44v4h10v4h4v10h4v44h-4v10h-4v4H72v4H28v-4H18v-4h-4V72h-4V28h4V18h4v-4h10z"/>
+          <path fill="#102838" d="M30 18h40v4h10v8h4v40h-4v8H70v4H30v-4H20v-8h-4V30h4v-8h10z"/>
+        </svg>
         <div class="mascot-runner">
           <svg class="mascot" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fizz-title fizz-desc" shape-rendering="crispEdges">
             <title id="fizz-title">Fizz the pixel mascot</title>
