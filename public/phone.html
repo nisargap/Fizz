@@ -3,48 +3,73 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#111429">
+  <meta name="theme-color" content="#0b1722">
   <title>Connect your phone · Fizz</title>
   <link rel="icon" href="/fizz-agent.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/sky.css">
+  <link rel="stylesheet" href="/app.css">
   <link rel="stylesheet" href="/phone.css">
   <script src="/phone.js" defer></script>
 </head>
 <body>
-  <main class="shell">
-    <header class="top"><span class="brand">FIZZ<span class="brand-star">✦</span></span><span class="eyebrow">PHONE SENSOR</span></header>
-    <section class="hero" aria-labelledby="title">
-      <div class="orbit"><span class="orbit-dot one"></span><span class="orbit-dot two"></span><img src="/fizz-agent.svg" alt="Fizz" width="112" height="112"></div>
-      <p class="overline">YOUR PHONE IS A SENSOR</p>
-      <h1 id="title">Let Fizz feel the world with you.</h1>
-      <p class="intro">Share motion from this browser. You can also record short voice clips when you choose. You control each permission.</p>
+  <div class="pixel-sky" aria-hidden="true">
+    <span class="shooting-star shooting-star-one"></span>
+    <span class="shooting-star shooting-star-two"></span>
+    <span class="shooting-star shooting-star-three"></span>
+  </div>
+  <main class="shell phone-shell">
+    <header class="phone-bar"><span class="brand">Fizz<span>.</span></span><span>PHONE SENSOR</span></header>
+    <section class="phone-hero" aria-labelledby="title">
+      <div class="agent-guide">
+        <div class="agent-stage" aria-hidden="true">
+          <div class="agent-halo"></div>
+          <img class="agent-mascot" src="/fizz-agent.svg" alt="">
+        </div>
+        <p>YOUR AGENT // FIZZ</p>
+      </div>
+      <p class="setup-eyebrow">YOUR PHONE IS A SENSOR</p>
+      <h1 class="setup-title" id="title">Let Fizz feel the world with you.</h1>
+      <p class="setup-intro">Share motion from this browser. You can also record short voice clips when you choose. You control each permission.</p>
     </section>
     <section class="panel" id="connect-panel" aria-live="polite">
-      <span class="panel-index">01 / CONNECT</span>
+      <div class="panel-top"><span>FIZZ // PHONE LINK</span><span>01 / CONNECT</span></div>
       <h2 id="connection-title">Checking your link…</h2>
       <p id="connection-detail">One moment while Fizz connects this phone.</p>
-      <button class="button primary" id="retry" hidden>Try link again</button>
+      <button class="primary" id="retry" hidden>Try link again</button>
     </section>
     <section class="sensor-section" id="sensor-section" hidden>
-      <article class="card motion-card">
-        <div class="card-icon" aria-hidden="true">↗</div>
-        <div class="card-copy"><span class="card-tag">LIVE SIGNAL</span><h2>Motion + orientation</h2><p>Acceleration and tilt are sampled about once per second while this page is open.</p></div>
-        <button class="button primary" id="motion-button">Start motion</button>
+      <article class="panel phone-card" style="--sensor-color:#8c9dff">
+        <div class="panel-top"><span>02 / LIVE SIGNAL</span><span>MOTION</span></div>
+        <div class="phone-card-head">
+          <span class="kind-badge phone-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M5 2h6v12H5z"/><path d="M1 5h2v2H1zm0 4h2v2H1zm12-4h2v2h-2zm0 4h2v2h-2z"/><path class="icon-cutout" d="M6 4h4v7H6zm1 8h2v1H7z"/></svg></span>
+          <div><h2>Motion + orientation</h2><p>Acceleration and tilt are sampled about once per second while this page is open.</p></div>
+        </div>
+        <button class="primary" id="motion-button">Start motion</button>
         <p class="card-status" id="motion-status" role="status">Waiting for your permission.</p>
         <div class="readout"><span>ACCELERATION</span><strong id="accel-readout">—</strong><small>m/s²</small></div>
       </article>
-      <article class="card location-card">
-        <div class="card-icon" aria-hidden="true">⌖</div>
-        <div class="card-copy"><span class="card-tag">OPTIONAL</span><h2>Location</h2><p>Share this phone’s position when you choose. Location stops when you turn it off or close this page.</p></div>
-        <button class="button secondary" id="location-button">Start location</button>
+      <article class="panel phone-card" style="--sensor-color:#5ee6c4">
+        <div class="panel-top"><span>03 / OPTIONAL</span><span>LOCATION</span></div>
+        <div class="phone-card-head">
+          <span class="kind-badge phone-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M5 1h6v1h1v1h1v6h-1v2h-1v2h-1v2H9v1H7v-1H6v-2H5v-2H4V9H3V3h1V2h1z"/><path class="icon-cutout" d="M6 4h4v1h1v3h-1v1H6V8H5V5h1z"/></svg></span>
+          <div><h2>Location</h2><p>Share this phone’s position when you choose. Location stops when you turn it off or close this page.</p></div>
+        </div>
+        <button class="secondary" id="location-button">Start location</button>
         <p class="card-status" id="location-status" role="status">Location is off.</p>
       </article>
-      <article class="card voice-card">
-        <div class="card-icon" aria-hidden="true">♫</div>
-        <div class="card-copy"><span class="card-tag">ON YOUR COMMAND</span><h2>Voice clips</h2><p>Record a short clip when you tap the button. Your microphone stops as soon as the clip ends.</p></div>
-        <button class="button secondary" id="voice-button">Record 3-second clip</button>
+      <article class="panel phone-card" style="--sensor-color:#ffa94d">
+        <div class="panel-top"><span>04 / ON YOUR COMMAND</span><span>VOICE</span></div>
+        <div class="phone-card-head">
+          <span class="kind-badge phone-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M6 1h4v1h1v7h-1v1H6V9H5V2h1z"/><path d="M3 6h1v3h1v1h1v1h4v-1h1V9h1V6h1v4h-1v1h-1v1H9v2h2v1H5v-1h2v-2H5v-1H4v-1H3z"/><path class="icon-cutout" d="M7 3h2v1H7zm0 3h2v1H7z"/></svg></span>
+          <div><h2>Voice clips</h2><p>Record a short clip when you tap the button. Your microphone stops as soon as the clip ends.</p></div>
+        </div>
+        <button class="secondary" id="voice-button">Record 3-second clip</button>
         <p class="card-status" id="voice-status" role="status">Microphone is off.</p>
         <div class="voice-preview" id="voice-preview" hidden><p>Replay your last sent clip</p><audio id="voice-playback" controls preload="metadata" aria-label="Your last sent voice clip"></audio></div>
-        <div class="transcript-controls"><label for="transcript">Words for Fizz to read</label><textarea id="transcript" maxlength="500" rows="3" placeholder="Type a note, or dictate if this browser supports it"></textarea><div class="transcript-actions"><button class="button secondary" id="dictate-button">Dictate</button><button class="button primary" id="transcript-button">Send words</button></div><p id="transcript-status" role="status">Fizz can search these words in chat.</p></div>
+        <div class="transcript-controls"><label for="transcript">Words for Fizz to read</label><textarea id="transcript" maxlength="500" rows="3" placeholder="Type a note, or dictate if this browser supports it"></textarea><div class="transcript-actions"><button class="secondary" id="dictate-button">Dictate</button><button class="primary" id="transcript-button">Send words</button></div><p class="card-status" id="transcript-status" role="status">Fizz can search these words in chat.</p></div>
       </article>
       <p class="privacy">This page needs to stay open to stream motion. Close it to stop. The Fizz account owner can revoke this phone at any time.</p>
       <button class="disconnect" id="disconnect">Disconnect this phone</button>

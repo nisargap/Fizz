@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="/app.css">
   <link rel="stylesheet" href="/dashboard.css">
   <link rel="stylesheet" href="/voice-clips.css">
+  <script src="/sensor-kinds.js" defer></script>
   <script src="/app.js" defer></script>
   <script src="/voice-clips.js" defer></script>
   <script src="/dashboard.js" defer></script>
@@ -76,33 +77,15 @@
         <h1 class="setup-title" id="setup-title" tabindex="-1">What type of sensors do you want to give Fizz?</h1>
         <p class="setup-intro">Choose any sensors you want. Tap a selected card to remove it.</p>
         <div class="sensor-grid" role="group" aria-label="Sensor types">
-          <button class="sensor-card" type="button" data-kind="water" style="--sensor-color:#8de5f2">
-            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M7 1h2v2h2v3h2v2h1v4h-1v2h-2v1H5v-1H3v-2H2V8h1V6h2V3h2z"/><path class="icon-cutout" d="M5 9h2v4H5z"/></svg></span><span class="sensor-name">Water</span><span class="sensor-detail">Leaks &amp; flow</span>
-          </button>
-          <button class="sensor-card" type="button" data-kind="gas" style="--sensor-color:#b8dfa4">
-            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M5 4h6v2h2v2h2v4h-2v2H3v-2H1V8h2V6h2z"/><path class="icon-cutout" d="M6 7h2v2H6zm3 3h2v2H9z"/></svg></span><span class="sensor-name">Gas</span><span class="sensor-detail">Air safety</span>
-          </button>
-          <button class="sensor-card" type="button" data-kind="radio" style="--sensor-color:#f1d198">
-            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M7 7h2v7H7zM5 14h6v1H5zM3 5h2v2H3zm8 0h2v2h-2zM1 2h2v3H1zm12 0h2v3h-2zM5 3h2v2H5zm4 0h2v2H9z"/></svg></span><span class="sensor-name">Radio</span><span class="sensor-detail">Signals &amp; waves</span>
-          </button>
-          <button class="sensor-card" type="button" data-kind="temperature" style="--sensor-color:#f3ad8b">
-            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M6 1h4v9h2v4h-2v1H6v-1H4v-4h2z"/><path class="icon-cutout" d="M7 3h2v7H7z"/></svg></span><span class="sensor-name">Temperature</span><span class="sensor-detail">Hot &amp; cold</span>
-          </button>
-          <button class="sensor-card" type="button" data-kind="pressure" style="--sensor-color:#bdbaef">
-            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M4 2h8v2h2v8h-2v2H4v-2H2V4h2z"/><path class="icon-cutout" d="M5 5h6v6H5z"/><path d="M7 7h2v5H7zM9 6h2v2H9z"/></svg></span><span class="sensor-name">Pressure</span><span class="sensor-detail">Force &amp; level</span>
-          </button>
-          <button class="sensor-card" type="button" data-kind="humidity" style="--sensor-color:#96d6d8">
-            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M4 1h2v2h2v3h1v3H8v2H6v-2H4V6H3V3h1zm7 5h2v2h1v3h-1v2h-2v-2h-1V8h1zM2 13h2v2H2zm4 0h2v2H6z"/></svg></span><span class="sensor-name">Humidity</span><span class="sensor-detail">Moisture</span>
-          </button>
-          <button class="sensor-card" type="button" data-kind="sound" style="--sensor-color:#eecb96">
-            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M2 6h3V4h2V2h2v12H7v-2H5v-2H2zM10 6h2v4h-2zm3-3h2v10h-2z"/></svg></span><span class="sensor-name">Sound</span><span class="sensor-detail">Audio events</span>
-          </button>
-          <button class="sensor-card" type="button" data-kind="phone" style="--sensor-color:#a7c8ed">
-            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M4 1h8v14H4z"/><path class="icon-cutout" d="M5 3h6v9H5z"/><path d="M7 13h2v1H7z"/></svg></span><span class="sensor-name">Phone</span><span class="sensor-detail">Mobile signals</span>
-          </button>
-          <button class="sensor-card" type="button" data-kind="custom" style="--sensor-color:#c8d9ee">
-            <span class="sensor-icon" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path d="M7 2h2v5h5v2H9v5H7V9H2V7h5z"/><path d="M2 2h2v2H2zm10 0h2v2h-2zM2 12h2v2H2zm10 0h2v2h-2z"/></svg></span><span class="sensor-name">Custom</span><span class="sensor-detail">Your idea</span>
-          </button>
+          <button class="sensor-card" type="button" data-kind="water"></button>
+          <button class="sensor-card" type="button" data-kind="gas"></button>
+          <button class="sensor-card" type="button" data-kind="radio"></button>
+          <button class="sensor-card" type="button" data-kind="temperature"></button>
+          <button class="sensor-card" type="button" data-kind="pressure"></button>
+          <button class="sensor-card" type="button" data-kind="humidity"></button>
+          <button class="sensor-card" type="button" data-kind="sound"></button>
+          <button class="sensor-card" type="button" data-kind="phone"></button>
+          <button class="sensor-card" type="button" data-kind="custom"></button>
         </div>
         <p class="selection-status" id="selection-status" role="status" aria-live="polite">No sensors selected yet</p>
         <button class="primary setup-start" id="setup-start" type="button" disabled>Start with sample data <span aria-hidden="true">→</span></button>
@@ -121,8 +104,8 @@
             <p class="voice-clips-status" id="voice-clips-status" role="status"></p>
             <div class="voice-clips-list" id="voice-clips-list"></div>
           </section>
-          <section class="dash-panel" aria-labelledby="alerts-title"><div class="section-heading"><div><p class="setup-eyebrow">02 / WATCH LIST</p><h2 id="alerts-title">Alerts</h2></div></div><div id="dashboard-alerts" class="alert-list"></div><form id="quick-alert" class="quick-alert"><label for="alert-sensor">Create a threshold alert</label><div class="quick-alert-fields"><select id="alert-sensor" required aria-label="Sensor"></select><input id="alert-metric" required placeholder="Metric e.g. temperature_c" aria-label="Metric"><select id="alert-operator" aria-label="Condition"><option value="gt">above</option><option value="lt">below</option></select><input id="alert-threshold" type="number" step="any" required placeholder="Value" aria-label="Threshold"><input id="alert-unit" placeholder="Unit (optional)" aria-label="Unit"><button type="submit" class="primary">Add alert</button></div><p class="form-message" id="alert-message" role="status"></p></form></section></div>
-        <section class="dash-panel chat-panel" aria-labelledby="chat-title"><div class="section-heading"><div><p class="setup-eyebrow">03 / TALK TO FIZZ</p><h2 id="chat-title">Ask your agent</h2></div><span class="chat-spark" aria-hidden="true">✦</span></div><div class="chat-messages" id="chat-messages" aria-live="polite"><div class="chat-message agent"><span>FIZZ</span><p>Hi! Ask me what your sensors are seeing, or tell me what you want to watch for.</p></div></div><form id="chat-form" class="chat-compose"><label class="visually-hidden" for="chat-input">Message Fizz</label><input id="chat-input" placeholder="Ask Fizz about your sensors..." autocomplete="off" required><button type="submit" class="primary" aria-label="Send message">↗</button></form><p class="form-message" id="chat-error" role="alert"></p></section>
+          <section class="dash-panel alerts-panel" aria-labelledby="alerts-title"><div class="section-heading"><div><p class="setup-eyebrow">02 / WATCH LIST</p><h2 id="alerts-title">Alerts</h2></div><p class="alert-summary" id="alert-summary"></p></div><div id="dashboard-alerts" class="alert-list"></div><form id="quick-alert" class="quick-alert"><label for="alert-sensor">Create a threshold alert</label><div class="quick-alert-fields"><select id="alert-sensor" required aria-label="Sensor"></select><input id="alert-metric" required placeholder="Metric e.g. temperature_c" aria-label="Metric"><select id="alert-operator" aria-label="Condition"><option value="gt">above</option><option value="gte">at or above</option><option value="lt">below</option><option value="lte">at or below</option></select><input id="alert-threshold" type="number" step="any" required placeholder="Value" aria-label="Threshold"><input id="alert-unit" placeholder="Unit (optional)" aria-label="Unit"><button type="submit" class="primary">Add alert</button></div><p class="form-message" id="alert-message" role="status"></p></form></section></div>
+        <section class="dash-panel chat-panel" aria-labelledby="chat-title"><div class="section-heading"><div><p class="setup-eyebrow">03 / TALK TO FIZZ</p><h2 id="chat-title">Ask your agent</h2></div><svg class="chat-avatar" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" shape-rendering="crispEdges"><g class="tentacle-left" fill="#599cb5"><path d="M22 52h10v10h-3v8h-8v-5h-3v-6h4z"/><path d="M43 54h9v11h-3v6h-8v-5h-3v-7h5z"/></g><g class="tentacle-right" fill="#80d7e9"><path d="M32 55h9v9h-3v8h-8v-6h-3v-7h5z"/><path d="M53 52h8v8h-3v9h-8v-6h-3v-7h6z"/></g><path fill="#387991" d="M24 10h32v3h8v5h5v8h3v23h-3v7h-5v5h-8v3H24v-3h-8v-5h-5v-7H8V26h3v-8h5v-5h8z"/><path fill="#a9eaf7" d="M24 13h32v3h8v5h4v8h3v17h-3v8h-5v5h-8v3H25v-3h-8v-5h-5v-8H9V29h3v-8h5v-5h7z"/><path fill="#d8f9ff" d="M24 16h25v3H22v3h-5v5h-4v13h-1V29h3v-8h6v-3h3z"/><path fill="#82d4e9" d="M61 25h5v6h3v15h-3v7h-5v5h-8v3H30v-3h23v-3h8v-5h4v-8h2V31h-6z"/><path class="fizz-eyes" fill="#153849" d="M25 37h8v9h-8zm23 0h8v9h-8z"/></svg></div><div class="chat-messages" id="chat-messages" aria-live="polite"><div class="chat-message agent"><span>FIZZ</span><p>Hi! Ask me what your sensors are seeing, or tell me what you want to watch for.</p></div></div><form id="chat-form" class="chat-compose"><label class="visually-hidden" for="chat-input">Message Fizz</label><input id="chat-input" placeholder="Ask Fizz about your sensors..." autocomplete="off" required><button type="submit" class="primary" aria-label="Send message">↗</button></form><p class="form-message" id="chat-error" role="alert"></p></section>
       </div>
     </section>
   </main>

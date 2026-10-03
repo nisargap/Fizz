@@ -1,7 +1,11 @@
-:root { color-scheme: dark; font-family: "VT323", monospace; background: #0b1722; color: #f4f9fa; }
+:root {
+  color-scheme: dark; font-family: "VT323", monospace; background: #0b1722; color: #f4f9fa;
+  /* Signed-in surfaces are slightly see-through so the pixel sky shows behind them. */
+  --glass: rgba(16, 40, 56, .72); --glass-inner: rgba(11, 34, 49, .6); --glass-card: rgba(16, 43, 57, .62);
+}
 * { box-sizing: border-box; }
 body { min-height: 100vh; margin: 0; display: grid; place-items: center; }
-button, input { font: inherit; }
+button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: wait; opacity: .65; }
 button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
@@ -36,7 +40,7 @@ input::placeholder { color: #7b9daa; }
 .secondary:hover { background: #18394a; }
 @media (max-width: 420px) { .panel { padding: 1.25rem; } .mode-switch button { font-size: 1.2rem; } }
 
-.setup-screen { border: 3px solid #69bed0; background: #102838; box-shadow: 10px 10px 0 #071018; padding: clamp(1.25rem, 4vw, 2.5rem); }
+.setup-screen { border: 3px solid #69bed0; background: var(--glass); box-shadow: 10px 10px 0 #071018; padding: clamp(1.25rem, 4vw, 2.5rem); }
 .setup-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 2px solid #31546a; padding-bottom: .75rem; color: #a9eaf7; letter-spacing: .08em; font-size: 1.2rem; }
 .setup-account { display: flex; align-items: center; gap: 1rem; color: #c6dce2; letter-spacing: 0; }
 .setup-sign-out { color: #a9eaf7; border: 0; background: transparent; text-decoration: underline; font-size: 1.2rem; }
@@ -51,9 +55,9 @@ input::placeholder { color: #7b9daa; }
 .setup-title:focus { outline: none; }
 .setup-intro { color: #c6dce2; font-size: 1.5rem; line-height: 1.1; text-align: center; margin: .9rem auto 1.6rem; }
 .sensor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-.sensor-card { display: grid; grid-template-columns: 60px 1fr; grid-template-rows: auto auto; align-items: center; column-gap: .85rem; min-height: 112px; text-align: left; border: 2px solid #47778a; background: #0b2231; color: #f4f9fa; padding: .85rem; box-shadow: 5px 5px 0 #071724; transition: transform .12s steps(2, end), box-shadow .12s steps(2, end), border-color .12s; }
+.sensor-card { display: grid; grid-template-columns: 60px 1fr; grid-template-rows: auto auto; align-items: center; column-gap: .85rem; min-height: 112px; text-align: left; border: 2px solid #47778a; background: var(--glass-inner); color: #f4f9fa; padding: .85rem; box-shadow: 5px 5px 0 #071724; transition: transform .12s steps(2, end), box-shadow .12s steps(2, end), border-color .12s; }
 .sensor-card:hover, .sensor-card:focus-visible { transform: translate(-3px, -3px); box-shadow: 8px 8px 0 #071724; border-color: var(--sensor-color); }
-.sensor-card[aria-pressed="true"] { border-color: var(--sensor-color); background: #173747; box-shadow: 5px 5px 0 var(--sensor-color); }
+.sensor-card[aria-pressed="true"] { border-color: var(--sensor-color); background: rgba(23, 55, 71, .82); box-shadow: 5px 5px 0 var(--sensor-color); }
 .sensor-card[aria-pressed="true"]::after { content: "✓ SELECTED"; grid-column: 2; color: var(--sensor-color); font-size: 1.05rem; letter-spacing: .04em; }
 .sensor-icon { grid-row: 1 / 3; width: 58px; height: 58px; display: grid; place-items: center; border: 2px solid var(--sensor-color); background: #102b39; color: var(--sensor-color); box-shadow: 3px 3px 0 #071724; }
 .sensor-icon svg { width: 36px; height: 36px; fill: currentColor; }
@@ -66,6 +70,9 @@ input::placeholder { color: #7b9daa; }
 .setup-start { display: block; margin: .8rem auto 1rem; }
 .selection-note { color: #bdd5dc; font-size: 1.15rem; text-align: center; margin: 0; }
 @keyframes agent-bob { 50% { transform: translateY(-6px); } }
+.kind-badge { --badge-bg: #102b39; width: 40px; height: 40px; flex: none; display: grid; place-items: center; border: 2px solid var(--sensor-color); background: var(--badge-bg); color: var(--sensor-color); box-shadow: 3px 3px 0 #071724; }
+.kind-badge svg { width: 24px; height: 24px; fill: currentColor; }
+.kind-badge .icon-cutout { fill: var(--badge-bg); }
 @media (max-width: 760px) {
   .sensor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
   .sensor-card { grid-template-columns: 44px 1fr; min-height: 92px; padding: .7rem; column-gap: .65rem; }

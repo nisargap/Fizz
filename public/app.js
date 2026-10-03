@@ -165,6 +165,17 @@ form.addEventListener('submit', async (event) => {
   }
 });
 
+document.querySelectorAll('.sensor-card').forEach((card) => {
+  const info = window.fizzKinds.get(card.dataset.kind);
+  const name = document.createElement('span');
+  name.className = 'sensor-name';
+  name.textContent = info.label;
+  const detail = document.createElement('span');
+  detail.className = 'sensor-detail';
+  detail.textContent = info.detail;
+  card.style.setProperty('--sensor-color', info.color);
+  card.replaceChildren(window.fizzKinds.badge(card.dataset.kind, 'sensor-icon'), name, detail);
+});
 $('create-mode').addEventListener('click', () => setMode('create'));
 $('sign-in-mode').addEventListener('click', () => setMode('sign-in'));
 $('back').addEventListener('click', () => { step = 1; render(); $('username').focus(); });

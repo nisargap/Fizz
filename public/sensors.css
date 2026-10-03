@@ -7,20 +7,42 @@ body { grid-template-columns: minmax(0, 1fr); }
 .sensors-heading h1 { font-size: clamp(3rem, 6vw, 5rem); }
 .sensors-heading p:last-child { color: #bdd5dc; font-size: 1.4rem; margin: .5rem 0 0; }
 .sensors-heading img { width: 105px; height: 105px; image-rendering: pixelated; }
-.sensor-add-form { display: grid; grid-template-columns: 1fr 1.5fr auto; gap: .7rem; align-items: end; }
+.sensor-add-form { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) auto; gap: .7rem; align-items: end; }
 .sensor-add-form label { font-size: 1.25rem; margin: 0; }
-.sensor-add-form input, .sensor-add-form select { display: block; width: 100%; border: 2px solid #47778a; background: #071b29; color: #fff; font-size: 1.35rem; padding: .45rem; margin-top: .3rem; }
-.sensor-add-form button { white-space: nowrap; font-size: 1.3rem; }
+.sensor-add-form input { display: block; width: 100%; min-height: 52px; border: 2px solid #47778a; background: #071b29; color: #fff; font-size: 1.35rem; padding: .45rem; margin-top: .3rem; }
+.field-label { display: block; font-size: 1.25rem; }
+.kind-field { min-width: 0; }
+.kind-picker { position: relative; margin-top: .3rem; }
+.kind-button { display: flex; align-items: center; gap: .65rem; width: 100%; min-height: 52px; border: 2px solid #47778a; background: #071b29; color: #fff; padding: .3rem .55rem; text-align: left; }
+.kind-button:hover, .kind-button[aria-expanded="true"] { border-color: var(--sensor-color); }
+.kind-button .kind-badge, .kind-option .kind-badge { width: 36px; height: 36px; box-shadow: 2px 2px 0 #071724; }
+.kind-button .kind-badge svg, .kind-option .kind-badge svg { width: 22px; height: 22px; }
+.kind-text { display: grid; min-width: 0; line-height: 1; }
+.kind-name { color: var(--sensor-color); font-size: 1.45rem; }
+.kind-detail, .kind-metric { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kind-detail { color: #bdd5dc; font-size: 1.05rem; }
+.kind-metric { margin-top: .15rem; color: #7f9daa; font-size: .95rem; }
+.kind-caret { margin-left: auto; color: #a9eaf7; font-size: 1.3rem; }
+.kind-button[aria-expanded="true"] .kind-caret { transform: rotate(180deg); }
+.kind-options { position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; width: max(100%, min(21rem, 86vw)); max-height: min(28rem, 62vh); overflow-y: auto; margin: 0; padding: .35rem; list-style: none; border: 2px solid #69bed0; background: #0b2231; box-shadow: 6px 6px 0 #071018; }
+.kind-options:focus { outline: none; }
+.kind-option { display: flex; align-items: center; gap: .7rem; padding: .4rem .5rem; border: 2px solid transparent; cursor: pointer; }
+.kind-option.active { border-color: var(--sensor-color); background: #173747; }
+.kind-option[aria-selected="true"] .kind-name::after { content: " ✓"; color: #f4f9fa; }
+.sensor-add-form button[type="submit"] { min-height: 52px; white-space: nowrap; font-size: 1.3rem; }
 .sensor-collection { margin: 1.6rem 0; }
 .sensor-collection .section-heading { align-items: end; }
 #sensor-count { color: #a9eaf7; font-size: 1.3rem; }
 .sensor-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
-.sensor-manage-card { min-width: 0; padding: 1rem; border: 2px solid #47778a; background: #0b2231; box-shadow: 5px 5px 0 #071724; }
-.sensor-manage-head { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
-.sensor-type { color: #a9eaf7; font-size: 1.05rem; letter-spacing: .06em; }
+.sensor-manage-card { min-width: 0; padding: 1rem; border: 2px solid color-mix(in srgb, var(--sensor-color) 40%, #47778a); background: var(--glass-inner); box-shadow: 5px 5px 0 #071724; }
+.sensor-manage-head { display: flex; gap: .8rem; align-items: start; }
+.sensor-manage-badge { width: 46px; height: 46px; }
+.sensor-manage-badge svg { width: 28px; height: 28px; }
+.sensor-manage-title { flex: 1; min-width: 0; }
+.sensor-type { color: var(--sensor-color); font-size: 1.05rem; letter-spacing: .06em; }
 .sensor-manage-head h3 { font-size: 2rem; line-height: 1; font-weight: 400; margin: .2rem 0 0; overflow-wrap: anywhere; }
-.sensor-live-value { font-size: 1.5rem; color: #a9eaf7; text-align: right; }
-.sensor-detail-line { color: #bdd5dc; font-size: 1.15rem; margin: .65rem 0 .9rem; text-transform: capitalize; }
+.sensor-live-value { font-size: 1.5rem; color: var(--sensor-color); text-align: right; }
+.sensor-detail-line { color: #bdd5dc; font-size: 1.15rem; margin: .65rem 0 .9rem; }
 .sensor-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
 .sensor-actions button { font-size: 1.1rem; padding: .25rem .5rem; }
 .sensor-remove { border: 2px solid #a85e5e; color: #ffc6b7; background: transparent; }
@@ -33,6 +55,6 @@ body { grid-template-columns: minmax(0, 1fr); }
 .secret-panel button { font-size: 1.1rem; padding: .2rem .5rem; }
 .api-guide h2 { font-size: 2.2rem; font-weight: 400; margin: 0; }
 .api-guide p:not(.setup-eyebrow) { color: #bdd5dc; font-size: 1.25rem; }
-.api-guide pre { overflow-x: auto; padding: 1rem; background: #071724; border: 1px solid #31546a; color: #a9eaf7; font-size: .95rem; }
-@media (max-width: 800px) { .sensor-list { grid-template-columns: 1fr; } .sensor-add-form { grid-template-columns: 1fr 1fr; } .sensor-add-form button { grid-column: 1 / -1; } }
-@media (max-width: 500px) { .sensors-heading img { width: 70px; height: 70px; } .sensor-add-form { grid-template-columns: 1fr; } .sensor-add-form button { grid-column: auto; } .sensor-manage-head { flex-direction: column; gap: .3rem; } .sensor-live-value { text-align: left; } }
+.api-guide pre { overflow-x: auto; padding: 1rem; background: rgba(7, 23, 36, .85); border: 1px solid #31546a; color: #a9eaf7; font-size: .95rem; }
+@media (max-width: 800px) { .sensor-list { grid-template-columns: 1fr; } .sensor-add-form { grid-template-columns: 1fr 1fr; } .sensor-add-form button[type="submit"] { grid-column: 1 / -1; } }
+@media (max-width: 500px) { .sensors-heading img { width: 70px; height: 70px; } .sensor-add-form { grid-template-columns: 1fr; } .sensor-add-form button[type="submit"] { grid-column: auto; } .sensor-manage-head { flex-wrap: wrap; } .sensor-live-value { flex-basis: 100%; text-align: left; } }

@@ -1,7 +1,8 @@
 (() => {
   const $ = (id) => document.getElementById(id);
-  const labels = { water: 'Water', gas: 'Gas', radio: 'Radio', temperature: 'Temperature', pressure: 'Pressure', humidity: 'Humidity', sound: 'Sound', phone: 'Phone', custom: 'Custom' };
+  const kinds = window.fizzKinds;
   let sensors = [];
+  let activeKind = 0;
   async function api(path, method = 'GET', body) {
     const response = await fetch(path, { method, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
     const data = await response.json();
@@ -25,11 +26,6 @@
     });
     return el;
   }
-  function valueOf(reading) {
-    if (!reading) return 'Waiting for data';
-    if (reading.metric === 'voice_clip') return 'Clip received';
-    return `${reading.numeric_value ?? reading.boolean_value ?? reading.text_value}${reading.unit ? ` ${reading.unit}` : ''}`;
-  }
   function showSecret(container, heading, secret) {
     const panel = node('div', 'secret-panel');
     panel.append(node('strong', '', heading), node('p', '', 'Copy this now. It will not be shown again.'));
@@ -43,12 +39,14 @@
     const list = $('sensor-list');
     list.replaceChildren();
     for (const sensor of sensors) {
+      const info = kinds.get(sensor.kind);
       const card = node('article', 'sensor-manage-card');
+      card.style.setProperty('--sensor-color', info.color);
       const head = node('div', 'sensor-manage-head');
-      const title = node('div');
-      title.append(node('span', 'sensor-type', `${labels[sensor.kind] || sensor.kind} / ${sensor.mode === 'simulated' ? 'SIMULATED' : sensor.mode === 'phone' ? 'PHONE' : 'LIVE API'}`), node('h3', '', sensor.name || labels[sensor.kind] || sensor.kind));
-      head.append(title, node('span', 'sensor-live-value', valueOf(sensor.latest_reading)));
-      const detail = node('p', 'sensor-detail-line', sensor.latest_reading ? `${sensor.latest_reading.metric.replaceAll('_', ' ')} · ${new Date(sensor.latest_reading.observed_at || sensor.latest_reading.received_at).toLocaleString()}` : 'Awaiting first reading');
+      const title = node('div', 'sensor-manage-title');
+      title.append(node('span', 'sensor-type', `${info.label.toUpperCase()} / ${sensor.mode === 'simulated' ? 'SIMULATED' : sensor.mode === 'phone' ? 'PHONE' : 'LIVE API'}`), node('h3', '', sensor.name || info.label));
+      head.append(kinds.badge(sensor.kind, 'kind-badge sensor-manage-badge'), title, node('span', 'sensor-live-value', kinds.formatReading(sensor.latest_reading)));
+      const detail = node('p', 'sensor-detail-line', sensor.latest_reading ? `${kinds.metricLabel(sensor.latest_reading.metric)} · ${new Date(sensor.latest_reading.observed_at || sensor.latest_reading.received_at).toLocaleString()}` : 'Awaiting first reading');
       const actions = node('div', 'sensor-actions');
       const secret = node('div', 'sensor-secret');
       if (sensor.mode === 'simulated') {
@@ -80,7 +78,7 @@
         }));
       }
       actions.append(button('Remove sensor', 'sensor-remove', async () => {
-        if (!confirm(`Remove ${sensor.name || labels[sensor.kind]}? Its API key and alerts will stop working.`)) return;
+        if (!confirm(`Remove ${sensor.name || info.label}? Its API key and alerts will stop working.`)) return;
         await api('/api/sensors', 'DELETE', { id: sensor.id });
         await refresh();
       }));
@@ -95,6 +93,89 @@
     render();
     void window.fizzVoiceClips.refresh(sensors);
   }
+  function kindText(kind) {
+    const info = kinds.get(kind);
+    const text = node('span', 'kind-text');
+    text.append(node('span', 'kind-name', info.label), node('span', 'kind-detail', info.detail));
+    return text;
+  }
+  function renderKindButton() {
+    const kind = $('new-kind').value;
+    const info = kinds.get(kind);
+    $('kind-button').style.setProperty('--sensor-color', info.color);
+    const caret = node('span', 'kind-caret', '▾');
+    caret.setAttribute('aria-hidden', 'true');
+    $('kind-button').replaceChildren(kinds.badge(kind), kindText(kind), caret);
+    $('new-name').placeholder = `e.g. ${info.example}`;
+  }
+  function setActiveKind(index) {
+    const options = [...$('kind-options').children];
+    activeKind = (index + options.length) % options.length;
+    options.forEach((option, i) => option.classList.toggle('active', i === activeKind));
+    $('kind-options').setAttribute('aria-activedescendant', options[activeKind].id);
+    options[activeKind].scrollIntoView({ block: 'nearest' });
+  }
+  function openKindPicker() {
+    $('kind-options').hidden = false;
+    $('kind-button').setAttribute('aria-expanded', 'true');
+    for (const option of $('kind-options').children) option.setAttribute('aria-selected', String(option.dataset.kind === $('new-kind').value));
+    setActiveKind(kinds.order.indexOf($('new-kind').value));
+    $('kind-options').focus();
+  }
+  function closeKindPicker(returnFocus = true) {
+    if ($('kind-options').hidden) return;
+    $('kind-options').hidden = true;
+    $('kind-button').setAttribute('aria-expanded', 'false');
+    if (returnFocus) $('kind-button').focus();
+  }
+  function chooseKind(kind) {
+    $('new-kind').value = kind;
+    renderKindButton();
+    closeKindPicker();
+  }
+  for (const kind of kinds.order) {
+    const info = kinds.get(kind);
+    const option = node('li', 'kind-option');
+    option.id = `kind-option-${kind}`;
+    option.dataset.kind = kind;
+    option.setAttribute('role', 'option');
+    option.style.setProperty('--sensor-color', info.color);
+    const text = kindText(kind);
+    text.append(node('span', 'kind-metric', info.unit ? `${info.metric} · ${info.unit}` : info.metric));
+    option.append(kinds.badge(kind), text);
+    option.addEventListener('click', () => chooseKind(kind));
+    option.addEventListener('pointermove', () => { if (activeKind !== kinds.order.indexOf(kind)) setActiveKind(kinds.order.indexOf(kind)); });
+    $('kind-options').append(option);
+  }
+  // Keep focus in the open list so its focusout does not close it before the toggle click lands.
+  $('kind-button').addEventListener('mousedown', (event) => { if (!$('kind-options').hidden) event.preventDefault(); });
+  $('kind-button').addEventListener('click', () => { if ($('kind-options').hidden) openKindPicker(); else closeKindPicker(); });
+  $('kind-button').addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    event.preventDefault();
+    openKindPicker();
+  });
+  $('kind-options').addEventListener('keydown', (event) => {
+    const last = kinds.order.length - 1;
+    if (event.key === 'ArrowDown') setActiveKind(activeKind + 1);
+    else if (event.key === 'ArrowUp') setActiveKind(activeKind - 1);
+    else if (event.key === 'Home') setActiveKind(0);
+    else if (event.key === 'End') setActiveKind(last);
+    else if (event.key === 'Enter' || event.key === ' ') chooseKind(kinds.order[activeKind]);
+    else if (event.key === 'Escape') closeKindPicker();
+    else if (event.key === 'Tab') { closeKindPicker(false); return; }
+    else if (/^[a-z]$/i.test(event.key)) {
+      // Type-ahead: jump to the next sensor type starting with the pressed letter.
+      const next = [...kinds.order.keys()].map((i) => (activeKind + 1 + i) % kinds.order.length)
+        .find((i) => kinds.get(kinds.order[i]).label.toLowerCase().startsWith(event.key.toLowerCase()));
+      if (next !== undefined) setActiveKind(next);
+    } else return;
+    event.preventDefault();
+  });
+  $('kind-options').addEventListener('focusout', (event) => {
+    if (!$('kind-picker').contains(event.relatedTarget)) closeKindPicker(false);
+  });
+  renderKindButton();
   $('add-sensor-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const button = $('add-sensor-form').querySelector('button[type=submit]');
