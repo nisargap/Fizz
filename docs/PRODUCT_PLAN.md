@@ -57,7 +57,7 @@ supabase/migrations/  SQL schema, RPC transaction, and policies
 
 Vercel Functions are stateless: no durable device state or conversation history in process memory. Supabase Postgres is the source of truth. Rust functions use Supabase's HTTP APIs; the browser only calls Fizz endpoints. Keep the Supabase service role credential server side.
 
-The chat agent uses Vercel AI Gateway's OpenAI compatible HTTP endpoint from Rust. Rust owns the short tool loop and calls read only tools such as `get_system_state` and `get_recent_events`. This uses Vercel model routing while honoring the all Rust requirement. The TypeScript AI SDK agent helper is outside this scope. Confirm this interpretation against the hackathon judging requirements before implementation; if a named SDK is mandatory, revisit the language constraint deliberately.
+The chat agent uses Vercel AI Gateway's OpenAI compatible HTTP endpoint from Rust. Rust owns the short tool loop and calls read only tools such as `get_system_state` and `get_recent_events`. This uses Vercel model routing while honoring the all Rust requirement. The user confirmed that a Rust agent calling Vercel AI Gateway is acceptable; no TypeScript AI SDK agent helper is required.
 
 The **leak rule is Rust code, not a model instruction**. Any authorized wet reading for an armed leak sensor produces a close valve decision. Supabase applies the reading and that decision in one database transaction. Chat can explain or suggest next steps, but it cannot bypass the rule, mark a command successful, or reopen the valve. Reset is an explicit authenticated demo action.
 
@@ -131,8 +131,7 @@ Agents must not edit another owner's paths. Shared contract changes go through t
 
 1. Which Supabase project should back preview and production? One project is simplest for the hackathon; a separate preview database avoids test data in the live demo.
 2. Which AI Gateway model and spending limit should Fizz use? Choose a tool capable model after checking the current model list.
-3. Does the hackathon require a specific Vercel AI SDK or Agent implementation, or is a Rust agent using AI Gateway acceptable?
-4. Should the demo site be public behind Fizz's six digit code, or restricted to invited Vercel accounts as it is today?
+3. Should the demo site be public behind Fizz's six digit code, or restricted to invited Vercel accounts as it is today?
 
 ## References
 
