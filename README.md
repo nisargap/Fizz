@@ -43,6 +43,19 @@ Open `/app.html` to create an account. Usernames are unique, case-insensitive, a
 
 Apply the migration with `supabase db push --project-ref <project-ref>`, then set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel. The browser calls only Fizz's `/api/onboarding`, `/api/session`, and `/api/me` endpoints; it never receives a Supabase key.
 
+## Supabase Compute
+
+`supabase/config.toml` enables experimental Compute. The private `fizz-worker` service lives in `supabase/compute/fizz-worker/` and runs a small Rust health server. It uses one 2 GB, 1 vCPU instance; no public URL is exposed. It is ready for future background or device work, but the Vercel app does not call it yet.
+
+To check or redeploy it against the linked Fizz Supabase project:
+
+```sh
+npx supabase@latest compute status fizz-worker
+npx supabase@latest compute push fizz-worker
+```
+
+The service responds to `GET /health` within the private Compute network.
+
 ## Deploy
 
 Create or link a Vercel project from this repository with the framework preset **Other** and the repository root as the root directory. Vercel detects `api/status.rs` as a Rust Function and serves `public/index.html` as a static asset. No build command or output directory is needed.
