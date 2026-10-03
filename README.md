@@ -2,6 +2,8 @@
 
 Fizz is the physical layer for AI agents. This repository starts with a small Rust API and a static project page, ready to deploy on Vercel.
 
+The hackathon product scope, architecture, demo flow, and parallel work assignments are in [the product plan](docs/PRODUCT_PLAN.md).
+
 ## Project layout
 
 - `api/status.rs` — native Rust Vercel Function at `/api/status`
