@@ -6,6 +6,7 @@
   let timer = null;
   let sensors = [];
   let requestInFlight = false;
+  let sessionGeneration = 0;
 
   async function api(path, method = 'GET', body) {
     const response = await fetch(path, { method, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
@@ -16,6 +17,7 @@
 
   function valueOf(reading) {
     if (!reading) return 'Waiting for data';
+    if (reading.metric === 'voice_clip') return 'Clip received';
     const value = reading.numeric_value ?? reading.boolean_value ?? reading.text_value;
     return `${value}${reading.unit ? ` ${reading.unit}` : ''}`;
   }
@@ -75,11 +77,14 @@
   async function refresh() {
     if (requestInFlight || $('dashboard').hidden) return;
     requestInFlight = true;
+    const version = sessionGeneration;
     try {
       const [inventory, alerts] = await Promise.all([api('/api/sensors'), api('/api/alerts')]);
+      if (version !== sessionGeneration || $('dashboard').hidden) return;
       sensors = inventory.sensors || [];
       renderSensors();
       renderAlerts(alerts);
+      void window.fizzVoiceClips.refresh(sensors);
     } catch (error) {
       $('dashboard-subtitle').textContent = `Unable to refresh sensor data: ${error.message}`;
     } finally { requestInFlight = false; }
@@ -164,6 +169,7 @@
 
   window.fizzDashboard = {
     start(username, initialSensors) {
+      sessionGeneration++;
       $('dashboard-username').textContent = username;
       $('dashboard-subtitle').textContent = 'Your sensors are ready.';
       sensors = initialSensors || [];
@@ -172,6 +178,6 @@
       refresh();
       timer = setInterval(refresh, 5000);
     },
-    stop() { if (timer) clearInterval(timer); timer = null; sensors = []; },
+    stop() { sessionGeneration++; if (timer) clearInterval(timer); timer = null; sensors = []; window.fizzVoiceClips.reset(); },
   };
 })();

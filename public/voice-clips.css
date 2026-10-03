@@ -1,0 +1,12 @@
+.voice-clips-panel { min-width: 0; }
+.voice-clips-status { margin: 0 0 .75rem; color: #bdd5dc; font-size: 1.2rem; }
+.voice-clips-list { display: grid; gap: .65rem; max-height: 390px; overflow-y: auto; }
+.voice-clip { min-width: 0; padding: .85rem; background: #102b39; border: 2px solid #31546a; }
+.voice-clip-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem 1rem; margin-bottom: .65rem; }
+.voice-clip h3 { margin: 0; color: #a9eaf7; font-size: 1.45rem; font-weight: 400; overflow-wrap: anywhere; }
+.voice-clip time { color: #9db8c2; font-size: 1.05rem; }
+.voice-clip-play { padding: .4rem .75rem; font-size: 1.2rem; }
+.voice-clip audio { display: block; width: 100%; min-width: 0; height: 42px; }
+.voice-clip audio[hidden], .voice-clip-play[hidden] { display: none; }
+.voice-clip-message { margin: .4rem 0 0; color: #bdd5dc; font-size: 1.1rem; }
+.voice-clip-message:empty { display: none; }

@@ -27,6 +27,7 @@
   }
   function valueOf(reading) {
     if (!reading) return 'Waiting for data';
+    if (reading.metric === 'voice_clip') return 'Clip received';
     return `${reading.numeric_value ?? reading.boolean_value ?? reading.text_value}${reading.unit ? ` ${reading.unit}` : ''}`;
   }
   function showSecret(container, heading, secret) {
@@ -92,6 +93,7 @@
     const result = await api('/api/sensors');
     sensors = result.sensors || [];
     render();
+    void window.fizzVoiceClips.refresh(sensors);
   }
   $('add-sensor-form').addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -116,7 +118,9 @@
       $('sensors-username').textContent = me.username;
       await refresh();
       setInterval(() => {
-        if (!document.hidden && !document.querySelector('.sensor-secret code')) refresh().catch(() => {});
+        if (document.hidden) return;
+        if (document.querySelector('.sensor-secret code')) void window.fizzVoiceClips.refresh(sensors);
+        else refresh().catch(() => {});
       }, 15000);
     } catch { location.href = '/app.html'; }
   })();

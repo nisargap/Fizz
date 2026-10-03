@@ -7,6 +7,7 @@ let lastOrientationSent = 0;
 let locationWatch = null;
 let lastLocationSent = 0;
 let stream;
+let voicePreviewUrl = null;
 
 function message(title, detail, retry = false) {
   $('connection-title').textContent = title;
@@ -165,6 +166,12 @@ async function recordClip() {
     });
     $('voice-status').textContent = 'Sending clip to Fizz…';
     await request('clip', { mime_type: mime, audio_base64: encoded }, true);
+    const playback = $('voice-playback');
+    playback.pause();
+    if (voicePreviewUrl) URL.revokeObjectURL(voicePreviewUrl);
+    voicePreviewUrl = URL.createObjectURL(blob);
+    playback.src = voicePreviewUrl;
+    $('voice-preview').hidden = false;
     $('voice-status').textContent = 'Clip sent. Microphone is off.';
   } catch (error) { $('voice-status').textContent = error.message; }
   finally { stream?.getTracks().forEach((track) => track.stop()); stream = null; button.disabled = false; }
@@ -207,6 +214,12 @@ function disconnect(detail = 'This phone is disconnected. Ask for a new pairing 
   stopLocation();
   localStorage.removeItem(storageKey);
   deviceToken = null;
+  $('voice-playback').pause();
+  $('voice-playback').removeAttribute('src');
+  $('voice-playback').load();
+  if (voicePreviewUrl) URL.revokeObjectURL(voicePreviewUrl);
+  voicePreviewUrl = null;
+  $('voice-preview').hidden = true;
   $('sensor-section').hidden = true;
   message('Phone disconnected', detail, true);
 }

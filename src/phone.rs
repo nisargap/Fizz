@@ -78,6 +78,18 @@ pub async fn handle(request: Request) -> Response<ResponseBody> {
             return error(401, "unauthorized", "Sign in to continue.");
         };
         let query = request.uri().query().unwrap_or("");
+        if method == "GET" && query.split('&').any(|part| part == "clips=1") {
+            let Ok(store) = Supabase::from_env() else {
+                return error(503, "database_unavailable", "Voice clips are unavailable.");
+            };
+            return match store
+                .rpc("fizz_phone_list_clips", json!({"p_owner_token": owner}))
+                .await
+            {
+                Ok(value) => respond(value),
+                Err(_) => error(503, "database_unavailable", "Voice clips are unavailable."),
+            };
+        }
         let clip = query
             .split('&')
             .find_map(|part| part.strip_prefix("clip_id="))
