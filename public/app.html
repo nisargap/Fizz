@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1722">
+  <title>Enter Fizz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <a class="brand" href="/" aria-label="Fizz home">Fizz<span>.</span></a>
+    <section class="panel" id="account-panel" aria-labelledby="auth-title">
+      <div class="panel-top"><span>FIZZ // CUSTOMER ACCESS</span><span id="step-label">01 / 02</span></div>
+      <div id="welcome" hidden>
+        <p class="eyebrow">Workspace access</p>
+        <h1 id="panel-title" tabindex="-1">You're in, <span id="welcome-name"></span>.</h1>
+        <p class="intro">Your account is ready. The device dashboard is coming next.</p>
+        <button class="secondary" id="sign-out" type="button">Sign out</button>
+      </div>
+      <div id="auth">
+        <p class="eyebrow">Secure workspace setup</p>
+        <h1 id="auth-title">Create your access</h1>
+        <p class="intro" id="auth-intro">Start with a unique username for your Fizz workspace.</p>
+        <div class="mode-switch" role="group" aria-label="Account action">
+          <button type="button" id="create-mode" class="selected" aria-pressed="true">Create account</button>
+          <button type="button" id="sign-in-mode" aria-pressed="false">Sign in</button>
+        </div>
+        <form id="account-form" novalidate>
+          <div id="username-step">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}" required placeholder="your_name" aria-describedby="username-help">
+            <p class="hint" id="username-help">3–24 letters, numbers, or underscores. Start with a letter.</p>
+          </div>
+          <div id="code-step" hidden>
+            <div class="chosen"><span>Username</span><strong id="chosen-username"></strong><button type="button" id="edit-username">Edit</button></div>
+            <label for="code">Six digit access code</label>
+            <input id="code" name="code" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="••••••" aria-describedby="code-help">
+            <p class="hint" id="code-help">Use exactly six numbers. Keep your code private.</p>
+            <div id="confirm-wrap">
+              <label for="confirm-code">Confirm access code</label>
+              <input id="confirm-code" name="confirm-code" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="••••••">
+            </div>
+          </div>
+          <p class="error" id="form-error" role="alert" hidden></p>
+          <div class="actions">
+            <button class="secondary" type="button" id="back" hidden>Back</button>
+            <button class="primary" type="submit" id="continue">Continue <span aria-hidden="true">→</span></button>
+          </div>
+        </form>
+      </div>
+    </section>
+    <p class="footnote">Fizz customer access · simulated device demo</p>
+  </main>
+</body>
+</html>

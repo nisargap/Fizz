@@ -5,6 +5,8 @@ edition = "2024"
 description = "The physical layer for AI agents"
 
 [dependencies]
+http-body-util = "0.1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 serde_json = "1"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 vercel_runtime = "2"
@@ -12,3 +14,15 @@ vercel_runtime = "2"
 [[bin]]
 name = "status"
 path = "api/status.rs"
+
+[[bin]]
+name = "onboarding"
+path = "api/onboarding.rs"
+
+[[bin]]
+name = "session"
+path = "api/session.rs"
+
+[[bin]]
+name = "me"
+path = "api/me.rs"

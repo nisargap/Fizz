@@ -7,7 +7,10 @@ The hackathon product scope, architecture, demo flow, and parallel work assignme
 ## Project layout
 
 - `api/status.rs` — native Rust Vercel Function at `/api/status`
+- `src/store/mod.rs` — server-side Supabase REST client and connection check
 - `public/index.html` — static page at `/`
+- `public/app.html` — customer onboarding and sign-in wizard
+- `supabase/migrations/` — customer and session schema
 - `Cargo.toml` — Rust package and function binary
 
 ## Local development
@@ -20,6 +23,25 @@ vercel dev
 ```
 
 Open `/` for the project page or `/api/status` for the JSON status response. The function is built by Vercel's Rust runtime; `cargo check` verifies its Rust code locally.
+
+## Supabase connection
+
+Connect an existing Supabase project to Fizz by setting these variables in the linked Vercel project for each deployment environment you use:
+
+| Variable | Value |
+| --- | --- |
+| `SUPABASE_URL` | Project URL, such as `https://<project-ref>.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | The project's **service_role** secret from Supabase API settings |
+
+The service role key is only read by Rust Functions. Do not put it in `public/`, commit it, or prefix it with `NEXT_PUBLIC_`. For local development, put both values in `.env.local` (already ignored by Git) or pull the Vercel development environment with `vercel env pull .env.local --yes`.
+
+After deployment, `GET /api/status` reports `database: "connected"` when Supabase accepts the credentials. It reports `unconfigured` or `unavailable` without exposing the project URL or key. This checks connectivity; device tables and the rest of the product plan are still to be implemented.
+
+## Customer onboarding
+
+Open `/app.html` to create an account. Usernames are unique, case-insensitive, and limited to 3–24 letters, numbers, and underscores; they must start with a letter. Customers choose a six digit access code and confirm it. The code is stored as a bcrypt hash in Supabase. After registration or sign-in, a random session token is stored only as a hash and sent in a 12 hour HttpOnly, Secure, SameSite=Lax cookie. Five incorrect codes lock that username for 15 minutes.
+
+Apply the migration with `supabase db push --project-ref <project-ref>`, then set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel. The browser calls only Fizz's `/api/onboarding`, `/api/session`, and `/api/me` endpoints; it never receives a Supabase key.
 
 ## Deploy
 
