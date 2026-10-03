@@ -4,6 +4,7 @@ use vercel_runtime::{Request, Response, ResponseBody};
 
 use crate::{
     customer::{error, reply, session_token},
+    notify,
     store::Supabase,
 };
 
@@ -96,7 +97,7 @@ pub async fn list(request: Request) -> Response<ResponseBody> {
                 "Sensor data is temporarily unavailable.",
             );
         }
-        _ => {}
+        _ => notify::dispatch(&store).await,
     }
     match store
         .rpc("fizz_list_sensors", json!({"p_token":token}))
@@ -271,7 +272,7 @@ pub async fn readings(request: Request) -> Response<ResponseBody> {
                 "Sensor data is temporarily unavailable.",
             );
         }
-        _ => {}
+        _ => notify::dispatch(&store).await,
     }
     match store
         .rpc(
@@ -370,7 +371,10 @@ pub async fn ingest(request: Request) -> Response<ResponseBody> {
             error(401, "unauthorized", "Sensor key is invalid or revoked.")
         }
         Ok(v) if v.get("error").is_some() => outcome(v, 202),
-        Ok(v) => reply(202, v, None),
+        Ok(v) => {
+            notify::dispatch(&store).await;
+            reply(202, v, None)
+        }
         Err(_) => error(
             503,
             "database_unavailable",

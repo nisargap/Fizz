@@ -6,6 +6,7 @@ use vercel_runtime::{Request, Response, ResponseBody};
 
 use crate::{
     customer::{error, reply, session_token},
+    notify,
     store::Supabase,
 };
 
@@ -34,6 +35,7 @@ fn rpc_error(value: &Value) -> Option<Response<ResponseBody>> {
         "invalid_rule" | "unknown_metric" => {
             error(400, code, "Use a reported numeric metric and its unit.")
         }
+        "invalid_notify" => error(400, code, "Enter a valid US phone number."),
         _ => error(
             503,
             "database_unavailable",
@@ -89,7 +91,37 @@ pub async fn alerts(request: Request) -> Response<ResponseBody> {
                     let Some(unit) = data.get("unit").and_then(Value::as_str) else {
                         return error(400, "invalid_rule", "Choose a unit.");
                     };
-                    json!({"p_token":token,"p_sensor_id":sensor_id,"p_metric":metric,"p_comparator":comparator,"p_threshold":threshold,"p_unit":unit})
+                    let mut payload = json!({"p_token":token,"p_sensor_id":sensor_id,"p_metric":metric,"p_comparator":comparator,"p_threshold":threshold,"p_unit":unit});
+                    match data
+                        .get("notify_channel")
+                        .and_then(Value::as_str)
+                        .unwrap_or("none")
+                    {
+                        "none" => {}
+                        channel @ ("sms" | "call") => {
+                            let Some(phone) = data
+                                .get("notify_phone")
+                                .and_then(Value::as_str)
+                                .and_then(notify::us_phone)
+                            else {
+                                return error(
+                                    400,
+                                    "invalid_notify",
+                                    "Enter a valid US phone number.",
+                                );
+                            };
+                            payload["p_notify_channel"] = json!(channel);
+                            payload["p_notify_phone"] = json!(phone);
+                        }
+                        _ => {
+                            return error(
+                                400,
+                                "invalid_notify",
+                                "Choose text, call, or no phone alert.",
+                            );
+                        }
+                    }
+                    payload
                 }
                 "PATCH" => {
                     let Some(id) = data.get("id").and_then(Value::as_str) else {

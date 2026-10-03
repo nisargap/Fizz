@@ -83,7 +83,15 @@
         await refresh();
       }));
       card.dataset.sensorId = sensor.id;
-      card.append(head, detail, actions, secret);
+      const idRow = node('div', 'sensor-id-row');
+      const copyId = button('Copy ID', 'secondary', async () => {
+        await navigator.clipboard.writeText(sensor.id);
+        copyId.textContent = 'Copied ✓';
+        setTimeout(() => { copyId.textContent = 'Copy ID'; }, 1500);
+      });
+      copyId.setAttribute('aria-label', `Copy sensor ID for ${sensor.name || info.label}`);
+      idRow.append(node('span', 'sensor-id-label', 'SENSOR ID'), node('code', 'sensor-id', sensor.id), copyId);
+      card.append(head, detail, idRow, actions, secret);
       list.append(card);
     }
   }

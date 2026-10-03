@@ -22,7 +22,7 @@
     <p class="voice-clips-status" id="voice-clips-status" role="status"></p>
     <div class="voice-clips-list" id="voice-clips-list"></div>
   </section>
-  <section class="dash-panel api-guide"><p class="setup-eyebrow">03 / OPEN API</p><h2>Send your own data</h2><p>Switch any sensor to API mode. Fizz shows its key once, then accepts JSON readings over HTTPS. Each sensor has its own key so you can rotate or revoke it independently.</p><pre><code>curl -X POST https://fizz-zeta.vercel.app/api/ingest \
+  <section class="dash-panel api-guide"><p class="setup-eyebrow">03 / OPEN API</p><h2>Send your own data</h2><p>Switch any sensor to API mode. Fizz shows its key once, then accepts JSON readings over HTTPS. Each sensor has its own key so you can rotate or revoke it independently. Copy the <code>sensor_id</code> from its card above.</p><pre><code>curl -X POST https://fizz-zeta.vercel.app/api/ingest \
   -H 'Authorization: Bearer YOUR_SENSOR_API_KEY' \
   -H 'Content-Type: application/json' \
   -d '{"sensor_id":"YOUR_SENSOR_ID","event_id":"sample-001","metrics":{"temperature_c":27.4}}'</code></pre></section>

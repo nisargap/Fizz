@@ -4,6 +4,7 @@ use vercel_runtime::{Request, Response, ResponseBody};
 
 use crate::{
     customer::{error, reply, session_token},
+    notify,
     store::Supabase,
 };
 
@@ -268,6 +269,9 @@ pub async fn handle(request: Request) -> Response<ResponseBody> {
     };
     match store.rpc(function, payload).await {
         Ok(mut value) => {
+            if action == "reading" && value.get("error").is_none() {
+                notify::dispatch(&store).await;
+            }
             if action == "create" {
                 if let Some(token) = value.get("token").and_then(Value::as_str) {
                     value["url"] = json!(format!("/phone.html#pair={token}"));

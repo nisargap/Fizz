@@ -68,6 +68,12 @@
 .quick-alert-fields { display: grid; grid-template-columns: 1.2fr 1.3fr .8fr .7fr .6fr auto; gap: .4rem; }
 .quick-alert-fields input, .quick-alert-fields select { min-width: 0; width: 100%; border: 2px solid #47778a; background: #071b29; color: white; padding: .35rem; font-size: 1.15rem; }
 .quick-alert-fields .primary { padding: .3rem .7rem; font-size: 1.2rem; white-space: nowrap; }
+.quick-alert-notify { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; margin-top: .5rem; }
+.quick-alert-notify label { margin: 0; color: #bdd5dc; font-size: 1.15rem; }
+.quick-alert-notify select, .quick-alert-notify input { min-width: 0; border: 2px solid #47778a; background: #071b29; color: white; padding: .35rem; font-size: 1.15rem; }
+.quick-alert-notify input { flex: 1 1 14rem; width: auto; }
+.alert-meta .notify { color: #a9eaf7; }
+.alert-meta .notify.failed { color: #ffb9af; }
 .form-message { min-height: 1.2em; color: #a9eaf7; font-size: 1.1rem; margin: .35rem 0 0; }
 .chat-panel { display: flex; flex-direction: column; min-height: 620px; }
 .chat-avatar { width: 64px; height: 64px; flex: none; overflow: visible; filter: drop-shadow(3px 4px 0 #071724); transform-origin: 50% 90%; animation: agent-bob 3s steps(3, end) infinite; }

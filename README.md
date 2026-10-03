@@ -71,7 +71,15 @@ curl -X POST https://fizz-zeta.vercel.app/api/ingest \
 
 Phone pairing links expire after 15 minutes and can be claimed once. A claimed phone can share motion and orientation while its page is open, and can optionally share location, a short audio clip, or a transcript after separate consent. Browser support and permissions vary by phone. Owners can revoke paired phones from the Sensors page.
 
-Alerts are evaluated in Supabase whenever a numeric reading is inserted. Chat uses Vercel AI Gateway to answer from stored customer readings and can propose an alert, which only becomes active after the customer confirms it. An AI outage does not stop ingestion or alert evaluation.
+Alerts are evaluated in Supabase whenever a numeric reading is inserted. An alert can also text or call a US phone number when it triggers. The database queues the notification on the alert event, and the next Fizz request that stores readings (API ingest, phone readings, or a sample-stream tick) sends it through Twilio. Each rule notifies at most once per 5 minutes, each account at most 20 times per hour, and failed sends are retried up to three times within an hour.
+
+| Variable | Value |
+| --- | --- |
+| `TWILIO_SID` | Twilio Account SID (`AC…`), or an API key SID (`SK…`) together with `TWILIO_ACCOUNT_SID` |
+| `TWILIO_CLIENT_SECRET` | The Auth Token, or the API key secret |
+| `TWILIO_FROM_NUMBER` | Optional E.164 sender such as `+14155550123`; defaults to the account's first SMS and voice capable number |
+
+Notifications are only sent where these variables are set, so preview deployments sharing the database leave queued alerts for production. Chat uses Vercel AI Gateway to answer from stored customer readings and can propose an alert, which only becomes active after the customer confirms it. An AI outage does not stop ingestion or alert evaluation.
 
 ## Supabase Compute
 

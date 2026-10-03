@@ -42,7 +42,11 @@ body { grid-template-columns: minmax(0, 1fr); }
 .sensor-type { color: var(--sensor-color); font-size: 1.05rem; letter-spacing: .06em; }
 .sensor-manage-head h3 { font-size: 2rem; line-height: 1; font-weight: 400; margin: .2rem 0 0; overflow-wrap: anywhere; }
 .sensor-live-value { font-size: 1.5rem; color: var(--sensor-color); text-align: right; }
-.sensor-detail-line { color: #bdd5dc; font-size: 1.15rem; margin: .65rem 0 .9rem; }
+.sensor-detail-line { color: #bdd5dc; font-size: 1.15rem; margin: .65rem 0 .6rem; }
+.sensor-id-row { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem; margin-bottom: .9rem; padding: .4rem .55rem; border: 1px solid #31546a; background: rgba(7, 23, 36, .7); }
+.sensor-id-label { color: #9db8c2; font-size: 1rem; letter-spacing: .1em; }
+.sensor-id { flex: 1; min-width: 0; color: var(--sensor-color); font-family: monospace; font-size: .9rem; overflow-wrap: anywhere; user-select: all; }
+.sensor-id-row button { padding: .1rem .5rem; font-size: 1.05rem; }
 .sensor-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
 .sensor-actions button { font-size: 1.1rem; padding: .25rem .5rem; }
 .sensor-remove { border: 2px solid #a85e5e; color: #ffc6b7; background: transparent; }
@@ -55,6 +59,7 @@ body { grid-template-columns: minmax(0, 1fr); }
 .secret-panel button { font-size: 1.1rem; padding: .2rem .5rem; }
 .api-guide h2 { font-size: 2.2rem; font-weight: 400; margin: 0; }
 .api-guide p:not(.setup-eyebrow) { color: #bdd5dc; font-size: 1.25rem; }
+.api-guide p code { color: #a9eaf7; font-family: monospace; font-size: .9rem; }
 .api-guide pre { overflow-x: auto; padding: 1rem; background: rgba(7, 23, 36, .85); border: 1px solid #31546a; color: #a9eaf7; font-size: .95rem; }
 @media (max-width: 800px) { .sensor-list { grid-template-columns: 1fr; } .sensor-add-form { grid-template-columns: 1fr 1fr; } .sensor-add-form button[type="submit"] { grid-column: 1 / -1; } }
 @media (max-width: 500px) { .sensors-heading img { width: 70px; height: 70px; } .sensor-add-form { grid-template-columns: 1fr; } .sensor-add-form button[type="submit"] { grid-column: auto; } .sensor-manage-head { flex-wrap: wrap; } .sensor-live-value { flex-basis: 100%; text-align: left; } }
