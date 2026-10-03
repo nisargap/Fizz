@@ -1,53 +1,6 @@
 :root { color-scheme: dark; font-family: "VT323", monospace; background: #0b1722; color: #f4f9fa; }
 * { box-sizing: border-box; }
 body { min-height: 100vh; margin: 0; display: grid; place-items: center; }
-.pixel-sky { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
-.pixel-sky::before, .pixel-sky::after { content: ""; position: absolute; top: 0; left: 0; image-rendering: pixelated; }
-.pixel-sky::before {
-  width: 2px; height: 2px; background: #7fbaca;
-  box-shadow:
-    5vw 9vh #7fbaca, 12vw 29vh #5e91a5, 18vw 65vh #7fbaca, 24vw 14vh #426b80,
-    29vw 43vh #7fbaca, 34vw 79vh #426b80, 41vw 22vh #7fbaca, 47vw 57vh #5e91a5,
-    53vw 8vh #7fbaca, 59vw 73vh #426b80, 65vw 34vh #7fbaca, 71vw 91vh #5e91a5,
-    77vw 15vh #426b80, 83vw 49vh #7fbaca, 89vw 72vh #5e91a5, 95vw 28vh #7fbaca,
-    8vw 82vh #426b80, 15vw 48vh #7fbaca, 22vw 92vh #5e91a5, 31vw 7vh #7fbaca,
-    38vw 53vh #426b80, 45vw 88vh #7fbaca, 56vw 41vh #5e91a5, 62vw 95vh #7fbaca,
-    69vw 5vh #426b80, 75vw 64vh #7fbaca, 86vw 84vh #426b80, 92vw 8vh #7fbaca;
-}
-.pixel-sky::after {
-  width: 4px; height: 4px; background: #c9f5fa;
-  box-shadow:
-    9vw 19vh #a9eaf7, 21vw 56vh #c9f5fa, 33vw 31vh #a9eaf7,
-    43vw 6vh #c9f5fa, 58vw 61vh #a9eaf7, 72vw 38vh #c9f5fa,
-    81vw 11vh #a9eaf7, 91vw 88vh #c9f5fa, 4vw 58vh #a9eaf7,
-    49vw 94vh #c9f5fa, 97vw 47vh #a9eaf7;
-  animation: star-twinkle 4s steps(2, end) infinite alternate;
-}
-.shooting-star {
-  position: absolute; width: 8px; height: 8px; background: #f4ffff;
-  box-shadow:
-    -8px -8px 0 #c9f5fa, -16px -16px 0 #a9eaf7,
-    -24px -24px 0 #7fc4d2, -32px -32px 0 #5b9caf,
-    -40px -40px 0 #356477, -48px -48px 0 #203f53;
-  opacity: 0;
-  animation: star-shoot 12s linear infinite;
-  will-change: transform, opacity;
-}
-.shooting-star::after {
-  content: ""; position: absolute; width: 4px; height: 4px;
-  left: 2px; top: -5px; background: #f4ffff;
-  box-shadow: 0 12px 0 #f4ffff, -6px 6px 0 #f4ffff, 6px 6px 0 #f4ffff;
-}
-.shooting-star-one { left: 4vw; top: 5vh; animation-delay: -1s; }
-.shooting-star-two { left: 49vw; top: -8vh; animation-delay: -5s; }
-.shooting-star-three { left: -9vw; top: 49vh; animation-delay: -9s; }
-@keyframes star-shoot {
-  0%, 9% { opacity: 0; transform: translate3d(0, 0, 0); }
-  11% { opacity: 1; }
-  24% { opacity: 1; transform: translate3d(47vw, 47vw, 0); }
-  27%, 100% { opacity: 0; transform: translate3d(53vw, 53vw, 0); }
-}
-@keyframes star-twinkle { to { opacity: .4; } }
 button, input { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: wait; opacity: .65; }
@@ -82,7 +35,3 @@ input::placeholder { color: #7b9daa; }
 .secondary:hover { background: #18394a; }
 .footnote { color: #8fb5c0; text-align: center; font-size: 1.15rem; margin-top: 2rem; }
 @media (max-width: 420px) { .panel { padding: 1.25rem; } .mode-switch button { font-size: 1.2rem; } }
-@media (prefers-reduced-motion: reduce) {
-  .pixel-sky::after { animation: none; }
-  .shooting-star { display: none; }
-}
