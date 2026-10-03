@@ -147,9 +147,12 @@
     const button = $('chat-form').querySelector('button[type=submit]');
     button.disabled = true;
     const pending = appendMessage('agent', 'Thinking...');
+    const version = sessionGeneration;
     try {
       const result = await api('/api/chat', 'POST', { message });
+      if (version !== sessionGeneration || $('dashboard').hidden) return;
       pending.querySelector('p').textContent = result.reply || 'I could not find an answer.';
+      window.fizzVoiceClips.attach(pending, result.clips);
       if (result.proposal) {
         const confirm = node('button', 'proposal-button', 'Activate this alert');
         confirm.type = 'button';
@@ -163,8 +166,11 @@
         });
         pending.append(confirm);
       }
-    } catch (error) { pending.querySelector('p').textContent = 'I could not answer right now.'; $('chat-error').textContent = error.message; }
-    finally { button.disabled = false; input.focus(); }
+      $('chat-messages').scrollTop = $('chat-messages').scrollHeight;
+    } catch (error) {
+      if (version === sessionGeneration) { pending.querySelector('p').textContent = 'I could not answer right now.'; $('chat-error').textContent = error.message; }
+    }
+    finally { button.disabled = false; if (version === sessionGeneration) input.focus(); }
   });
 
   window.fizzDashboard = {
@@ -178,6 +184,16 @@
       refresh();
       timer = setInterval(refresh, 5000);
     },
-    stop() { sessionGeneration++; if (timer) clearInterval(timer); timer = null; sensors = []; window.fizzVoiceClips.reset(); },
+    stop() {
+      sessionGeneration++;
+      if (timer) clearInterval(timer);
+      timer = null;
+      sensors = [];
+      window.fizzVoiceClips.reset();
+      $('chat-messages').replaceChildren();
+      appendMessage('agent', 'Hi! Ask me what your sensors are seeing, or tell me what you want to watch for.');
+      $('chat-input').value = '';
+      $('chat-error').textContent = '';
+    },
   };
 })();

@@ -3,6 +3,8 @@
   const list = document.getElementById('voice-clips-list');
   const status = document.getElementById('voice-clips-status');
   const rows = new Map();
+  const players = new Set();
+  const chatGroups = new Set();
   let generation = 0;
   let pending = null;
 
@@ -29,6 +31,7 @@
     const play = node('button', 'secondary voice-clip-play', '▶ Play clip');
     play.type = 'button';
     const audio = node('audio');
+    players.add(audio);
     audio.controls = true;
     audio.preload = 'none';
     audio.hidden = true;
@@ -74,7 +77,7 @@
     });
     audio.addEventListener('play', () => {
       message.textContent = '';
-      for (const row of rows.values()) if (row.audio !== audio) row.audio.pause();
+      for (const player of players) if (player !== audio) player.pause();
     });
     audio.addEventListener('error', () => {
       if (!disposed) message.textContent = 'This browser could not play the clip. Try another browser.';
@@ -84,6 +87,7 @@
       element, audio, sensorId: clip.sensor_id, update,
       dispose() {
         disposed = true;
+        players.delete(audio);
         audio.pause();
         audio.removeAttribute('src');
         audio.load();
@@ -98,12 +102,27 @@
     pending = null;
     for (const row of rows.values()) row.dispose();
     rows.clear();
+    for (const group of chatGroups) {
+      for (const row of group.rows) row.dispose();
+      group.element.remove();
+    }
+    chatGroups.clear();
     panel.hidden = true;
     status.textContent = '';
   }
 
   window.fizzVoiceClips = {
     reset,
+    attach(container, clips) {
+      if (!Array.isArray(clips) || !clips.length) return;
+      const element = node('div', 'chat-voice-clips');
+      element.setAttribute('role', 'group');
+      element.setAttribute('aria-label', 'Voice clip attachments');
+      const mounted = clips.slice(0, 5).map(createRow);
+      for (const row of mounted) element.append(row.element);
+      container.append(element);
+      chatGroups.add({ element, rows: mounted });
+    },
     async refresh(sensors) {
       if (!sensors.some((sensor) => sensor.kind === 'phone')) { reset(); return; }
       panel.hidden = false;
@@ -116,6 +135,14 @@
           const clips = data.clips || [];
           const current = new Set(clips.map((clip) => clip.clip_id));
           const sensorIds = new Set(sensors.map((sensor) => sensor.id));
+          for (const group of chatGroups) {
+            group.rows = group.rows.filter((row) => {
+              if (sensorIds.has(row.sensorId)) return true;
+              row.dispose();
+              return false;
+            });
+            if (!group.rows.length) { group.element.remove(); chatGroups.delete(group); }
+          }
           for (const [id, row] of rows) {
             // Keep playing audio mounted while live readings and clip metadata refresh.
             if (!sensorIds.has(row.sensorId) || (!current.has(id) && row.audio.paused)) {

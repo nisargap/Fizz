@@ -10,3 +10,5 @@
 .voice-clip audio[hidden], .voice-clip-play[hidden] { display: none; }
 .voice-clip-message { margin: .4rem 0 0; color: #bdd5dc; font-size: 1.1rem; }
 .voice-clip-message:empty { display: none; }
+.chat-voice-clips { display: grid; gap: .65rem; margin-top: .85rem; min-width: 0; }
+.chat-message:has(.chat-voice-clips) { width: 100%; min-width: 0; }
