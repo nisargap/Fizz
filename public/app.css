@@ -33,5 +33,4 @@ input::placeholder { color: #7b9daa; }
 .primary:hover { background: #d1f7ff; }
 .secondary { background: transparent; color: #a9eaf7; }
 .secondary:hover { background: #18394a; }
-.footnote { color: #8fb5c0; text-align: center; font-size: 1.15rem; margin-top: 2rem; }
 @media (max-width: 420px) { .panel { padding: 1.25rem; } .mode-switch button { font-size: 1.2rem; } }
