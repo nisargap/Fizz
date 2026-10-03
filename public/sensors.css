@@ -1,0 +1,38 @@
+body { grid-template-columns: minmax(0, 1fr); }
+.shell.dashboard-active { min-width: 0; justify-self: center; }
+.api-guide { min-width: 0; }
+.api-guide pre { max-width: 100%; }
+.sensors-heading { display: flex; align-items: center; justify-content: space-between; padding: 1.7rem 0; }
+.sensors-heading .setup-eyebrow { text-align: left; }
+.sensors-heading h1 { font-size: clamp(3rem, 6vw, 5rem); }
+.sensors-heading p:last-child { color: #bdd5dc; font-size: 1.4rem; margin: .5rem 0 0; }
+.sensors-heading img { width: 105px; height: 105px; image-rendering: pixelated; }
+.sensor-add-form { display: grid; grid-template-columns: 1fr 1.5fr auto; gap: .7rem; align-items: end; }
+.sensor-add-form label { font-size: 1.25rem; margin: 0; }
+.sensor-add-form input, .sensor-add-form select { display: block; width: 100%; border: 2px solid #47778a; background: #071b29; color: #fff; font-size: 1.35rem; padding: .45rem; margin-top: .3rem; }
+.sensor-add-form button { white-space: nowrap; font-size: 1.3rem; }
+.sensor-collection { margin: 1.6rem 0; }
+.sensor-collection .section-heading { align-items: end; }
+#sensor-count { color: #a9eaf7; font-size: 1.3rem; }
+.sensor-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+.sensor-manage-card { min-width: 0; padding: 1rem; border: 2px solid #47778a; background: #0b2231; box-shadow: 5px 5px 0 #071724; }
+.sensor-manage-head { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
+.sensor-type { color: #a9eaf7; font-size: 1.05rem; letter-spacing: .06em; }
+.sensor-manage-head h3 { font-size: 2rem; line-height: 1; font-weight: 400; margin: .2rem 0 0; overflow-wrap: anywhere; }
+.sensor-live-value { font-size: 1.5rem; color: #a9eaf7; text-align: right; }
+.sensor-detail-line { color: #bdd5dc; font-size: 1.15rem; margin: .65rem 0 .9rem; text-transform: capitalize; }
+.sensor-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+.sensor-actions button { font-size: 1.1rem; padding: .25rem .5rem; }
+.sensor-remove { border: 2px solid #a85e5e; color: #ffc6b7; background: transparent; }
+.sensor-remove:hover { background: #4e2932; }
+.sensor-secret { margin-top: .6rem; }
+.secret-panel { border: 2px solid #a9eaf7; background: #102b39; padding: .7rem; }
+.secret-panel strong { display: block; font-size: 1.3rem; font-weight: 400; color: #a9eaf7; }
+.secret-panel p { font-size: 1.1rem; margin: .2rem 0 .5rem; }
+.secret-panel code { display: block; font-family: monospace; font-size: .9rem; line-height: 1.4; word-break: break-all; margin-bottom: .5rem; }
+.secret-panel button { font-size: 1.1rem; padding: .2rem .5rem; }
+.api-guide h2 { font-size: 2.2rem; font-weight: 400; margin: 0; }
+.api-guide p:not(.setup-eyebrow) { color: #bdd5dc; font-size: 1.25rem; }
+.api-guide pre { overflow-x: auto; padding: 1rem; background: #071724; border: 1px solid #31546a; color: #a9eaf7; font-size: .95rem; }
+@media (max-width: 800px) { .sensor-list { grid-template-columns: 1fr; } .sensor-add-form { grid-template-columns: 1fr 1fr; } .sensor-add-form button { grid-column: 1 / -1; } }
+@media (max-width: 500px) { .sensors-heading img { width: 70px; height: 70px; } .sensor-add-form { grid-template-columns: 1fr; } .sensor-add-form button { grid-column: auto; } .sensor-manage-head { flex-direction: column; gap: .3rem; } .sensor-live-value { text-align: left; } }

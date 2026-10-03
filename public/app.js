@@ -7,6 +7,7 @@ const sensorNames = {
   pressure: 'Pressure', humidity: 'Humidity', sound: 'Sound', phone: 'Phone', custom: 'Custom',
 };
 let chosenKinds = [];
+let signedInUsername = '';
 
 function showError(message) {
   $('form-error').textContent = message;
@@ -80,6 +81,7 @@ function renderSetup() {
     card.setAttribute('aria-pressed', String(chosenKinds.includes(card.dataset.kind)));
   });
   const count = chosenKinds.length;
+  $('setup-start').disabled = count === 0;
   $('selection-status').textContent = count === 0
     ? 'No sensors selected yet'
     : `${count} sensor ${count === 1 ? 'type' : 'types'} selected: ${chosenKinds.map((kind) => sensorNames[kind]).join(', ')}`;
@@ -91,7 +93,11 @@ async function loadSetup() {
   $('setup-retry').hidden = true;
   setupError('');
   try {
-    const state = await send('/api/setup', 'GET');
+    const [state, inventory] = await Promise.all([send('/api/setup', 'GET'), send('/api/sensors', 'GET')]);
+    if (inventory.sensors?.length) {
+      showDashboard(inventory.sensors);
+      return;
+    }
     chosenKinds = state.choices.filter((kind) => sensorNames[kind]);
     renderSetup();
   } catch (error) {
@@ -102,11 +108,23 @@ async function loadSetup() {
 }
 
 function showSetup(username) {
+  signedInUsername = username;
   $('account-panel').hidden = true;
+  $('dashboard').hidden = true;
   $('setup').hidden = false;
   document.querySelector('.shell').classList.add('setup-active');
+  document.querySelector('.shell').classList.remove('dashboard-active');
   $('setup-username').textContent = username;
   loadSetup();
+}
+
+function showDashboard(sensors) {
+  $('account-panel').hidden = true;
+  $('setup').hidden = true;
+  $('dashboard').hidden = false;
+  document.querySelector('.shell').classList.remove('setup-active');
+  document.querySelector('.shell').classList.add('dashboard-active');
+  window.fizzDashboard.start(signedInUsername, sensors);
 }
 
 async function send(url, method, data) {
@@ -166,17 +184,40 @@ document.querySelectorAll('.sensor-card').forEach((card) => card.addEventListene
     cards.forEach((item) => { item.disabled = false; });
   }
 }));
+$('setup-start').addEventListener('click', async () => {
+  const button = $('setup-start');
+  button.disabled = true;
+  setupError('');
+  try {
+    const current = await send('/api/sensors', 'GET');
+    for (const kind of chosenKinds) {
+      if (!current.sensors.some((sensor) => sensor.kind === kind)) {
+        await send('/api/sensors', 'POST', { kind, mode: 'simulated' });
+      }
+    }
+    const inventory = await send('/api/sensors', 'GET');
+    showDashboard(inventory.sensors);
+  } catch (error) {
+    setupError(error.message);
+    button.disabled = chosenKinds.length === 0;
+  }
+});
 $('setup-retry').addEventListener('click', loadSetup);
-$('sign-out').addEventListener('click', async () => {
+async function signOut() {
   try {
     await send('/api/session', 'DELETE');
+    window.fizzDashboard.stop();
     $('setup').hidden = true;
+    $('dashboard').hidden = true;
     $('account-panel').hidden = false;
     document.querySelector('.shell').classList.remove('setup-active');
+    document.querySelector('.shell').classList.remove('dashboard-active');
     chosenKinds = [];
     setMode('sign-in');
   } catch { /* Keep the signed-in view if the server could not revoke the session. */ }
-});
+}
+$('sign-out').addEventListener('click', signOut);
+$('dashboard-sign-out').addEventListener('click', signOut);
 
 fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' })
   .then((response) => response.ok ? response.json() : null)

@@ -1,140 +1,88 @@
-# Fizz product plan
+# Fizz product plan: sensors, phone, chat, alerts
 
-## Goal
+## Product outcome
 
-Build a small, convincing Supabase Select hackathon demo of **Fizz, the physical layer for AI agents**. A user enters one six digit access code, sees connected devices, talks to Fizz, and triggers a simulated water leak. Fizz immediately closes a simulated main valve, records what happened, and explains the incident in chat. A documented API lets someone register another sensor and send readings.
+A customer signs in, picks one or more sensor types, and immediately sees useful sample data. Every sensor can instead accept readings through a documented API key. Phone sensors use a separate link that the customer can send to a phone. Fizz can answer questions about stored data and help create alerts. A dedicated Sensors page lets the customer add, configure, and remove sensors later.
 
-The first release controls **simulated devices only**. The architecture leaves an adapter boundary for physical hardware later; the demo must label simulated actions clearly.
+The nine types are Water, Gas, Radio, Temperature, Pressure, Humidity, Sound, Phone, and Custom. A selected type becomes a **sensor instance** with its own name, mode, status, latest reading, and credential. A type alone is not a connected sensor.
 
-## Demo success criteria
+## Current state and decisions
 
-1. Open the landing page and enter the six digit code to reach the dashboard.
-2. See a seeded water leak sensor and main valve, with the valve initially open.
-3. Add another sensor through the dashboard or `POST /api/sensors`; receive its one time ingest token.
-4. Press **Simulate leak**, or send a leak reading through the new sensor's API token.
-5. In one request, the rule engine records the reading, creates an incident, closes the simulated valve, and records the command. The UI shows the updated state and an in app alert without a reload.
-6. Ask Fizz “What happened?” and get a short answer grounded in the stored reading, incident, and valve state.
-7. Press **Reset demo** and repeat the sequence. Repeating the same reading ID must not create a second incident or command.
+- The live app has username plus six digit code sign-in, a session cookie, and a multi-select grid of sensor type **choices**. Those choices are stored in `fizz_sensor_choices`; no instances or readings exist yet.
+- The frontend is static HTML/CSS/JavaScript. API routes are Rust Vercel Functions. Supabase is the source of truth. A private experimental Supabase Compute service exists but currently serves only `/health`.
+- Keep Rust for API and agent orchestration. Call Vercel AI Gateway from the Rust chat function, as agreed in the earlier plan. The model never receives Supabase credentials or sensor API keys.
+- Use one scoped API key per API sensor instance, shown only at creation or rotation. Do not use one account-wide `API_KEY` for all sensors; revoking one device should leave others working.
+- Store normalized numeric, boolean, and text readings plus units and timestamps. Retain raw payload only when needed for a custom sensor. Audio is a separate, consented media path, not a JSON reading.
 
-If the AI provider is unavailable, the safety action still happens and the UI shows a clear chat error. Fizz must never claim an action succeeded until the stored command says it did.
+## Wedge 1 — sensor instances and a simple onboarding handoff
 
-## Scope for the first demo
+**Experience:** The current type grid remains the first signed-in screen for accounts without sensors. Selecting types and pressing **Start with sample data** creates one simulated instance for each selected type and opens the dashboard. The customer does not have to configure units, keys, or phone permissions first. A small **Connect real data** action on each instance exposes API setup later. Phone gets **Send phone link** instead of a generic API setup prompt. Existing `fizz_sensor_choices` become the migration input so previous customers keep their selections.
 
-| Build now | Later |
-| --- | --- |
-| One shared six digit code and short lived session | User accounts, organizations, invitations |
-| Leak sensors and one simulated water valve | General device types and real device drivers |
-| Manual simulation button and authenticated sensor ingest API | MQTT, device discovery, firmware management |
-| Deterministic leak to shutoff rule, incident log, in app alert | Custom rule editor, SMS, email, push notifications |
-| Text chat with read only system tools | Autonomous model initiated actuator commands |
-| Supabase persistence and repeatable seed/reset | Multi site history and analytics |
+**Build:** Add `fizz_sensors` with customer ownership, `kind`, `name`, `mode` (`simulated`, `api`, or `phone`), status, timestamps, and soft deletion. Add `fizz_sensor_readings` with instance ID, event ID, observed time, received time, metric name, value, unit, and source. Enforce ownership through server-side session checks and database functions. Add `GET`, `POST`, `PATCH`, and `DELETE /api/sensors` with IDs in JSON request bodies. Keep onboarding choices separate until migration and backfill are verified.
 
-## Product and visual direction
+**Done when:** A new account reaches a dashboard in one action, each selected type has a named instance, reload preserves the instances, and an existing customer's choices migrate without duplication.
 
-- Keep the existing public landing page. Its CTA becomes **Enter Fizz** and opens a separate dashboard page.
-- Use plain HTML, CSS, and a small amount of vanilla JavaScript for fetch and polling. HTMX is an option only if it removes code in a specific view; no frontend framework or build step.
-- Carry forward VT323, the solid `#0b1722` background, light blue `#a9eaf7`, darker blue outlines, square or stepped panels, crisp pixel borders, and the animated mascot. Avoid gradients, blur, and pink accents.
-- Desktop: chat is the primary column; device state, incident, and simulator controls sit beside it. Mobile: stack the same sections with the active incident first.
-- Make simulation obvious: label the sensor and valve **Simulated**. The event timeline should use plain verbs: “Leak detected,” “Valve closed,” “Incident opened.”
-- Use native form controls, visible focus states, high contrast text, and reduced motion support.
+## Wedge 2 — real ingest and sample streams
 
-## Technical shape
+**Experience:** Each sensor card shows its current mode, latest value, a small history chart, and a clear **Simulated** or **Live** label. The Sensors page offers **Try sample stream**, **Connect via API**, rotate key, pause, and remove. Sample mode includes visible example values and a short description of what each metric means.
 
-```text
-public/index.html     landing page
-public/app.html       code entry + dashboard shell
-public/app.css        shared pixel design tokens and dashboard styles
-public/app.js         small fetch/polling/chat controller
+**Ingest contract:** `POST /api/ingest` accepts `Authorization: Bearer <sensor API key>` and a compact JSON body such as:
 
-api/*.rs              Vercel Rust Functions, each declared as a Cargo binary
-src/lib.rs            shared Rust library for API handlers
-src/auth/             code verification, sessions, device token checks
-src/store/            Supabase REST/RPC client and persistence mapping
-src/domain/           device types and deterministic leak rule
-src/agent/            AI Gateway HTTP client, prompt, read only tools
-supabase/migrations/  SQL schema, RPC transaction, and policies
+```json
+{"sensor_id":"YOUR_SENSOR_ID","event_id":"reading-001","observed_at":"2026-10-03T20:00:00Z","metrics":{"temperature_c":27.4}}
 ```
 
-Vercel Functions are stateless: no durable device state or conversation history in process memory. Supabase Postgres is the source of truth. Rust functions use Supabase's HTTP APIs; the browser only calls Fizz endpoints. Keep the Supabase service role credential server side.
+Validate that the key belongs to that instance, metric names and units match its type, values are bounded, and `(sensor_id, event_id)` is unique so retries do not duplicate readings or alerts. Return the accepted reading ID and server timestamp. Hash keys in Supabase, show the raw key once, allow rotation and revocation, limit payload size and rate, and document `curl` examples for each type. A Custom sensor starts with a simple metric name, unit, and numeric or text value schema.
 
-The chat agent uses Vercel AI Gateway's OpenAI compatible HTTP endpoint from Rust. Rust owns the short tool loop and calls read only tools such as `get_system_state` and `get_recent_events`. This uses Vercel model routing while honoring the all Rust requirement. The user confirmed that a Rust agent calling Vercel AI Gateway is acceptable; no TypeScript AI SDK agent helper is required.
+**Sample fixtures:** Water: flow and leak state; Gas: concentration and alarm state; Radio: signal strength; Temperature: degrees C; Pressure: kPa; Humidity: percent; Sound: decibels; Phone: acceleration magnitude and orientation; Custom: a sample numeric metric. Show units and realistic value ranges in the UI and docs. Use the same reading pipeline for simulated and live data, while labeling source on every reading. Simulated readings advance on authenticated API reads at most once per 15 seconds; the dashboard polls while open.
 
-The **leak rule is Rust code, not a model instruction**. Any authorized wet reading for an armed leak sensor produces a close valve decision. Supabase applies the reading and that decision in one database transaction. Chat can explain or suggest next steps, but it cannot bypass the rule, mark a command successful, or reopen the valve. Reset is an explicit authenticated demo action.
+**Done when:** A sample stream for each of the nine types produces readable history, an external client can send authenticated readings, duplicate event IDs have one effect, and revoking a key stops further ingest.
 
-## Data contract
+## Wedge 3 — send a phone link and capture browser sensors
 
-Use UUID primary keys and UTC timestamps. Start with these tables:
+**Experience:** From a Phone sensor, the customer clicks **Create phone link**, copies or shares a unique HTTPS URL, and sees whether that phone is connected. Opening the URL shows the sensor owner and a plain list of available signals. The phone user explicitly starts each capability and can stop sharing at any time. The dashboard can revoke the connection.
 
-| Table | Essential fields | Purpose |
+**Pairing:** The link contains a short-lived, single-use pairing token, scoped to one Phone instance. Exchange it on the phone page for a device session; do not put a permanent API key in the URL. Allow expiry, regeneration, and revocation. A paired phone publishes through the same authenticated ingest pipeline as other instances.
+
+**Browser capabilities:** Start with accelerometer/device motion and orientation where supported. Add microphone capture through `getUserMedia` only after a separate user gesture and browser permission; show a visible recording state. Store short audio clips only if the user elects to share audio, and create a transcript for chat queries. Geolocation can be an optional permission later. Show unsupported and denied capabilities individually. Mobile browser access requires HTTPS, varies by browser, and streaming stops when the tab or browser is closed or suspended; communicate this on the phone page.
+
+**Done when:** A second phone can open a fresh link, grant motion permission, send readings visible on the dashboard, optionally record a short voice clip, and revoke access from either device. An expired or reused link cannot pair another phone.
+
+## Wedge 4 — Fizz chat grounded in sensor data
+
+**Experience:** Add a chat window beside sensor status on desktop and beneath it on mobile. Fizz can answer questions such as “What is the temperature now?”, “Was there a gas spike today?”, and “What did the phone recording say?” Answers identify the sensor, value or transcript, and time. Show a clear unavailable state if the model fails.
+
+**Build:** The Rust `/api/chat` function uses Vercel AI Gateway with bounded tool calls. Read-only tools fetch the customer's sensor list, latest values, time windows, alert history, and consented transcripts. Scope every tool query by the authenticated customer; keep provider keys on the server. Persist chat turns with bounded history. The model can propose actions, but data reads and rule writes stay in typed server code.
+
+**Done when:** Chat answers are grounded in stored readings, cannot query another customer, report missing or stale data honestly, and cannot invent an alert or sensor connection.
+
+## Wedge 5 — alerts by form and chat
+
+**Experience:** A customer can create an alert from a sensor card or say “Tell me when the temperature exceeds 30 °C.” Fizz displays an editable confirmation with sensor, metric, comparator, threshold, unit, and delivery choice. The customer confirms before the rule becomes active. Start with in-app notifications and an alert timeline; add email or push after that flow works.
+
+**Build:** Store typed `alert_rules` and `alert_events`. Parse chat requests into a proposed rule, validate against the selected sensor's metric schema, then create the rule through an authenticated server action only after confirmation. Evaluate rules deterministically as readings are accepted. Record threshold crossings, use a cooldown or re-arm condition to avoid repeated alerts, and make `(rule_id, reading_id)` idempotent. The model explains alerts; it does not decide whether a threshold fired.
+
+**Done when:** A temperature reading below the threshold is quiet, a crossing above it creates one visible alert, a duplicate reading creates none, and disabling or deleting the rule stops future alerts. Chat-created and form-created rules behave identically.
+
+## Wedge 6 — dedicated Sensors page and operational polish
+
+The Sensors page lists every instance with type, mode, last reading, freshness, alert count, and connection state. Add and remove instances there without returning to onboarding. Removing an instance revokes its API key or phone session immediately, stops simulation, disables its alerts, and retains historical readings as an archived record unless the customer explicitly deletes history. Offer key rotation, phone link regeneration, and a copyable API example in context.
+
+Set retention limits for high-frequency readings and audio, monitor ingest errors and worker health, and show when data is stale. Test desktop and mobile, permission denial, missing data, expired credentials, repeated events, and a model outage. Production Vercel deployment protection currently gates access, so a sendable phone link also needs an intentional public route or protection bypass design before the phone wedge is released.
+
+## Release order
+
+| Release | Customer-visible result | Gate |
 | --- | --- | --- |
-| `devices` | `id`, `name`, `kind` (`leak_sensor` or `water_valve`), `mode` (`simulated`), `state`, `created_at` | Connected device registry and current state |
-| `device_tokens` | `device_id`, `token_hash`, `created_at`, `revoked_at` | Per sensor ingest credentials; return raw token once |
-| `readings` | `id`, `device_id`, `event_id` (unique per device), `wet`, `created_at` | Incoming sensor facts and retry deduplication |
-| `incidents` | `id`, `sensor_id`, `reading_id` (unique), `status`, `created_at`, `resolved_at` | User visible leak incidents |
-| `commands` | `id`, `incident_id` (unique), `device_id`, `action`, `status`, `created_at` | Auditable simulated valve actions |
-| `messages` | `id`, `role`, `content`, `created_at` | Small shared chat transcript for the demo |
+| 1 | One-click simulated sensors and dashboard | Existing choices migrate; no duplicate instances |
+| 2 | API keys, real ingest, nine sample streams, Sensors page basics | Auth, retry, rate, and revocation checks |
+| 3 | Unique phone link with motion and optional voice clip | Consent, expiry, revocation, and real phone test |
+| 4 | Vercel AI Gateway chat over readings | Grounding, tenant isolation, failure behavior |
+| 5 | Threshold alerts by form and chat | Deterministic crossing and idempotency checks |
+| 6 | Full sensor management and retention polish | Remove/restore behavior and stale-data checks |
 
-The Rust domain module owns the wet reading to close valve decision. The SQL migration owns an `apply_reading_decision` RPC that inserts the reading and atomically applies that validated decision by creating the incident, setting the valve state, and recording one command. Duplicate `(device_id, event_id)` calls return the existing outcome. Decide the exact JSON shape in the shared contract before writing the RPC and Rust client.
+## Choices to settle during implementation
 
-Seed one sensor and one valve. Store no raw device tokens in the database. Restrict browser access to the tables; only server side functions use privileged Supabase credentials.
-
-## HTTP contract (v1)
-
-All responses are JSON except the static pages. Errors use `{ "error": { "code": "...", "message": "..." } }` and an appropriate HTTP status. Session endpoints use an HttpOnly cookie. Device ingestion uses a per sensor bearer token. All other API routes require the session.
-
-| Method and route | Request | Response / effect |
-| --- | --- | --- |
-| `POST /api/session` | `{ "code": "123456" }` | Sets a signed session cookie; returns `{ "ok": true }` |
-| `DELETE /api/session` | None | Clears cookie |
-| `GET /api/state` | None | `{ "devices": [], "active_incident": null, "recent_events": [] }` |
-| `POST /api/sensors` | `{ "name": "Basement leak sensor" }` | Creates simulated leak sensor; returns its ID and one time `ingest_token` |
-| `POST /api/readings` | `{ "event_id": "client-generated-id", "wet": true }` | With sensor bearer token, records reading and rule outcome |
-| `POST /api/demo` | `{ "action": "leak" }` or `{ "action": "reset" }` | Uses the same rule path as ingest, or restores seeded demo state |
-| `POST /api/chat` | `{ "message": "What happened?" }` | Persists turn, runs bounded read only tool loop, returns `{ "reply": "..." }` |
-
-The frontend polls `GET /api/state` every 2–3 seconds while visible, and refreshes immediately after a mutation. No WebSocket or background worker is needed for the demo. Cap request sizes, chat turns, and tool iterations so a bad prompt cannot create an unbounded run.
-
-## Authentication and configuration
-
-- `FIZZ_ACCESS_CODE`: six digit secret set in Vercel, never in source or browser JavaScript.
-- `FIZZ_SESSION_SECRET`: separate random secret for a signed, HttpOnly, Secure, SameSite=Lax cookie with a short expiry.
-- `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`: server side Supabase access.
-- `AI_GATEWAY_API_KEY` and `FIZZ_MODEL`: model access and chosen model ID. Check the selected model supports tool calls before hardcoding it.
-- Rate limit code attempts at the Vercel edge or through a small shared counter; a six digit code cannot be exposed to unlimited guessing. Do not log the code, device tokens, or service role key.
-- Keep Vercel deployment protection enabled during construction. Revisit its setting when the code screen is ready and the intended audience is known.
-
-The user can connect the existing Supabase project when implementation starts. The integration owner then applies the migration, sets Vercel environment variables, and verifies preview and production use the intended database. Do not commit credentials or a local `.env` file.
-
-## Parallel work plan
-
-**Phase 0: one short integration pass before parallel work.** The integrator adds `src/lib.rs`, shared request/response types, the exact `apply_reading_decision` RPC contract, a route/binary naming convention, and the needed `[[bin]]` entries in `Cargo.toml`. This is the only shared contract others should build against. Parallel agents work in separate branches or worktrees and own disjoint paths.
-
-| Owner | File ownership | Deliverable | Can start after |
-| --- | --- | --- | --- |
-| Agent A — interface | `public/app.html`, `public/app.css`, `public/app.js`, small landing CTA edit | Code entry, device cards, simulator, incident timeline, chat; responsive pixel style and fetch calls matching the HTTP contract | Phase 0 API shapes |
-| Agent B — Supabase | `supabase/migrations/**`, `src/store/**` | Schema, seed/reset SQL, transactional leak RPC, HTTP store client, idempotency proof | Phase 0 RPC and types |
-| Agent C — rules and simulation | `src/domain/**`, `src/simulator/**` | Typed leak rule, device state transitions, demo fixtures, unit tests for wet/dry/duplicate readings | Phase 0 types |
-| Agent D — chat agent | `src/agent/**` | AI Gateway client, bounded read only tool loop, grounded prompt, unavailable/error behavior | Phase 0 types and tool interface |
-| Integrator — auth and API | `Cargo.toml`, `src/lib.rs`, `src/auth/**`, `api/**`, `README.md`, Vercel/Supabase settings | PIN/session/device auth, route wiring, end to end deployment and demo verification | Runs alongside agents; merges after each contract check |
-
-Agents must not edit another owner's paths. Shared contract changes go through the integrator first. If only four workers are available, the integrator plus Agents A–C start together; Agent D starts when one slot frees. Agent A can use mocked contract responses until the API is ready.
-
-## Delivery order and gates
-
-1. **Vertical slice:** Supabase connected, schema applied, login works, seeded state renders, leak button closes valve and opens one incident. Verify this before AI work is merged.
-2. **Open API:** register sensor, obtain token, send wet and dry readings, retry an event ID, confirm no duplicate action.
-3. **Agent:** ask about current state and leak history; verify answers cite current stored facts and failed model calls do not affect valve state.
-4. **Polish:** pixel UI, mobile view, loading/error states, in app alert, reset, clear simulation labels.
-5. **Demo rehearsal:** run the seven success criteria from a fresh browser session, then test wrong code, missing token, dry reading, duplicate wet reading, and model failure.
-
-## Decisions to confirm before build
-
-1. Which Supabase project should back preview and production? One project is simplest for the hackathon; a separate preview database avoids test data in the live demo.
-2. Which AI Gateway model and spending limit should Fizz use? Choose a tool capable model after checking the current model list.
-3. Should the demo site be public behind Fizz's six digit code, or restricted to invited Vercel accounts as it is today?
-
-## References
-
-- [Vercel Rust Functions](https://vercel.com/docs/functions/runtimes/rust)
-- [Vercel AI Gateway HTTP and tool calling](https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/tool-calling)
-- [Supabase database migrations](https://supabase.com/docs/guides/deployment/database-migrations)
+1. Whether phone voice means short clips plus transcripts for the first demo, or continuous audio while the page is open. Short clips are the proposed first release because consent, storage, and browser behavior are easier to make clear.
+2. Whether the production Fizz site should be reachable by anyone with a Fizz account. Vercel deployment protection currently blocks ordinary visitors, including recipients of phone links.
+3. Which Vercel AI Gateway model and spending limit to use when chat is built. Verify current tool support and pricing before selecting one.

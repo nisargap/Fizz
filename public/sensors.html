@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b1722">
+  <title>Sensors · Fizz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/sky.css"><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/dashboard.css"><link rel="stylesheet" href="/sensors.css">
+  <script src="/sensors.js" defer></script>
+</head>
+<body><div class="pixel-sky" aria-hidden="true"><span class="shooting-star shooting-star-one"></span><span class="shooting-star shooting-star-two"></span><span class="shooting-star shooting-star-three"></span></div>
+<main class="shell dashboard-active"><section class="dashboard" aria-labelledby="sensors-title">
+  <header class="dashboard-bar"><a class="dashboard-logo" href="/">Fizz<span>.</span></a><nav aria-label="Workspace"><a href="/app.html">Overview</a><a class="active" href="/sensors.html">Sensors</a></nav><div class="dashboard-account"><span id="sensors-username"></span><button type="button" id="sensors-sign-out">Sign out</button></div></header>
+  <div class="sensors-heading"><div><p class="setup-eyebrow">YOUR SIGNALS / YOUR RULES</p><h1 id="sensors-title">Sensors</h1><p>Give Fizz more ways to understand your world.</p></div><img src="/fizz-agent.svg" alt="" aria-hidden="true"></div>
+  <section class="dash-panel sensor-add" aria-labelledby="add-title"><div class="section-heading"><div><p class="setup-eyebrow">01 / EXPAND FIZZ</p><h2 id="add-title">Add a sensor</h2></div></div><form id="add-sensor-form" class="sensor-add-form"><label for="new-kind">Type<select id="new-kind" required><option value="water">Water</option><option value="gas">Gas</option><option value="radio">Radio</option><option value="temperature">Temperature</option><option value="pressure">Pressure</option><option value="humidity">Humidity</option><option value="sound">Sound</option><option value="phone">Phone</option><option value="custom">Custom</option></select></label><label for="new-name">Name<input id="new-name" maxlength="60" placeholder="e.g. Kitchen temperature"></label><button class="primary" type="submit">Add sample sensor +</button></form><p class="form-message" id="add-message" role="status"></p></section>
+  <section class="sensor-collection" aria-labelledby="your-sensors-title"><div class="section-heading"><div><p class="setup-eyebrow">02 / YOUR SENSORS</p><h2 id="your-sensors-title">Connected to Fizz</h2></div><span id="sensor-count"></span></div><div id="sensor-list" class="sensor-list"></div><p id="sensor-empty" class="dashboard-empty" hidden>No sensors yet. Add one above to start with sample data.</p></section>
+  <section class="dash-panel api-guide"><p class="setup-eyebrow">03 / OPEN API</p><h2>Send your own data</h2><p>Switch any sensor to API mode. Fizz shows its key once, then accepts JSON readings over HTTPS. Each sensor has its own key so you can rotate or revoke it independently.</p><pre><code>curl -X POST https://YOUR-FIZZ-DOMAIN/api/ingest \
+  -H 'Authorization: Bearer YOUR_SENSOR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{"sensor_id":"YOUR_SENSOR_ID","event_id":"sample-001","metrics":{"temperature_c":27.4}}'</code></pre></section>
+  <p class="form-message" id="page-error" role="alert"></p>
+</section></main></body></html>

@@ -30,3 +30,27 @@ path = "api/me.rs"
 [[bin]]
 name = "setup"
 path = "api/setup.rs"
+
+[[bin]]
+name = "sensors"
+path = "api/sensors.rs"
+
+[[bin]]
+name = "readings"
+path = "api/readings.rs"
+
+[[bin]]
+name = "ingest"
+path = "api/ingest.rs"
+
+[[bin]]
+name = "chat"
+path = "api/chat.rs"
+
+[[bin]]
+name = "alerts"
+path = "api/alerts.rs"
+
+[[bin]]
+name = "phone"
+path = "api/phone.rs"

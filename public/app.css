@@ -63,6 +63,7 @@ input::placeholder { color: #7b9daa; }
 .setup-error { margin: 1.4rem auto 0; padding: .4rem .7rem; max-width: 600px; border-left: 3px solid #ffb9af; color: #ffb9af; font-size: 1.35rem; text-align: center; }
 .setup-retry { display: block; margin: 1rem auto 0; }
 .selection-status { color: #a9eaf7; font-size: 1.5rem; line-height: 1.1; text-align: center; margin: 1.8rem auto .4rem; }
+.setup-start { display: block; margin: .8rem auto 1rem; }
 .selection-note { color: #bdd5dc; font-size: 1.15rem; text-align: center; margin: 0; }
 @keyframes agent-bob { 50% { transform: translateY(-6px); } }
 @media (max-width: 760px) {
