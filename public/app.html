@@ -38,6 +38,11 @@
         </div>
         <form id="account-form" novalidate>
           <div id="username-step">
+            <div id="invite-wrap">
+              <label for="invite">Invite code</label>
+              <input id="invite" name="invite" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="32" required placeholder="FIZZ-XXXX-XXXX-XXXX" aria-describedby="invite-help">
+              <p class="hint" id="invite-help">Fizz is invite-only for now. No code? <a href="/">Join the waitlist</a>.</p>
+            </div>
             <label for="username">Username</label>
             <input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}" required placeholder="your_name" aria-describedby="username-help">
             <p class="hint" id="username-help">3–24 letters, numbers, or underscores. Start with a letter.</p>

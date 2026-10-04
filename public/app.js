@@ -24,12 +24,13 @@ function render() {
   $('code-step').hidden = creating && step === 1;
   $('chosen-username').textContent = $('username').value.trim().toLowerCase();
   $('confirm-wrap').hidden = !creating;
+  $('invite-wrap').hidden = !creating;
   $('edit-username').hidden = !creating;
   $('back').hidden = !creating || step === 1;
   $('step-label').textContent = creating ? `${String(step).padStart(2, '0')} / 02` : 'SIGN IN';
   $('auth-title').textContent = creating ? (step === 1 ? 'Create your access' : 'Set your access code') : 'Welcome back';
   $('auth-intro').textContent = creating
-    ? (step === 1 ? 'Start with a unique username for your Fizz workspace.' : 'Choose a six digit code to protect your account.')
+    ? (step === 1 ? 'Enter your invite code and choose a unique username for your Fizz workspace.' : 'Choose a six digit code to protect your account.')
     : 'Enter your username and six digit access code.';
   $('continue').innerHTML = creating && step === 1 ? 'Continue <span aria-hidden="true">→</span>' : creating ? 'Create account' : 'Sign in';
   $('code').autocomplete = creating ? 'new-password' : 'current-password';
@@ -49,6 +50,17 @@ function validUsername() {
   if (!/^[A-Za-z][A-Za-z0-9_]{2,23}$/.test(name)) {
     showError('Use 3–24 letters, numbers, or underscores. Start with a letter.');
     $('username').focus();
+    return false;
+  }
+  return true;
+}
+
+// Invite codes look like FIZZ-ABCD-EFGH-JKMN; the server does the real check.
+function validInvite() {
+  const symbols = $('invite').value.replace(/[^A-Za-z0-9]/g, '').length;
+  if (symbols < 12 || symbols > 16) {
+    showError('Enter the invite code from your Fizz invitation.');
+    $('invite').focus();
     return false;
   }
   return true;
@@ -135,12 +147,13 @@ async function send(url, method, data) {
     body: data ? JSON.stringify(data) : undefined,
   });
   const result = await response.json();
-  if (!response.ok) throw new Error(result.error?.message || 'Something went wrong. Try again.');
+  if (!response.ok) throw Object.assign(new Error(result.error?.message || 'Something went wrong. Try again.'), { code: result.error?.code });
   return result;
 }
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
+  if (mode === 'create' && step === 1 && !validInvite()) return;
   if (!validUsername()) return;
   if (mode === 'create' && step === 1) {
     step = 2;
@@ -155,10 +168,18 @@ form.addEventListener('submit', async (event) => {
   try {
     const result = await send(mode === 'create' ? '/api/onboarding' : '/api/session', 'POST', {
       username: $('username').value.trim(), code: $('code').value,
+      ...(mode === 'create' ? { invite: $('invite').value.trim() } : {}),
     });
     form.reset();
     showSetup(result.username);
   } catch (error) {
+    // Invite and username problems are fixed on the first step.
+    const field = { invalid_invite: 'invite', username_taken: 'username' }[error.code];
+    if (mode === 'create' && field) {
+      step = 1;
+      render();
+      $(field).focus();
+    }
     showError(error.message);
   } finally {
     button.disabled = false;
@@ -234,4 +255,5 @@ fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' })
   .then((response) => response.ok ? response.json() : null)
   .then((data) => { if (data?.username) showSetup(data.username); })
   .catch(() => {});
+if (location.hash === '#sign-in') mode = 'sign-in';
 render();

@@ -58,3 +58,7 @@ path = "api/phone.rs"
 [[bin]]
 name = "voice"
 path = "api/voice.rs"
+
+[[bin]]
+name = "waitlist"
+path = "api/waitlist.rs"

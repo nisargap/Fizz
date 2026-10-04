@@ -13,6 +13,7 @@
     <style>
       :root { color-scheme: dark; font-family: "VT323", monospace; }
       * { box-sizing: border-box; }
+      .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
       body {
         min-height: 100vh; margin: 0; display: grid; place-items: center; overflow-x: hidden;
         background: #0b1722; color: #f4f9fa;
@@ -22,9 +23,18 @@
       .eyebrow { margin: 0 0 1rem; color: #9ce6f7; font-size: 1.25rem; letter-spacing: .15em; text-transform: uppercase; }
       h1 { margin: 0; font-size: clamp(7rem, 16vw, 12rem); line-height: .8; }
       .tagline { max-width: 28rem; margin: 2rem 0 2.5rem; font-size: clamp(2rem, 3.3vw, 2.7rem); line-height: 1.05; color: #bdd5dc; }
-      a { display: inline-block; color: #0b1722; background: #a9eaf7; padding: .65rem 1.15rem; border-radius: .45rem; font-size: 1.5rem; text-decoration: none; }
-      a:hover { background: #d1f7ff; }
-      a:focus-visible { outline: 3px solid white; outline-offset: 4px; }
+      .waitlist-intro { margin: 0 0 .8rem; font-size: 1.45rem; color: #9ce6f7; }
+      .waitlist { display: flex; gap: .6rem; max-width: 30rem; }
+      .waitlist input { flex: 1; min-width: 0; font: inherit; font-size: 1.5rem; color: #fff; background: #071b29; border: 2px solid #69bed0; border-radius: .45rem; padding: .5rem .8rem; }
+      .waitlist input::placeholder { color: #7b9daa; }
+      .waitlist button { font: inherit; font-size: 1.5rem; color: #0b1722; background: #a9eaf7; border: 0; border-radius: .45rem; padding: .65rem 1.15rem; cursor: pointer; }
+      .waitlist button:hover { background: #d1f7ff; }
+      .waitlist button:disabled { opacity: .6; cursor: wait; }
+      .waitlist-status { min-height: 1.6rem; margin: .7rem 0 0; font-size: 1.35rem; color: #bdd5dc; }
+      .waitlist-status.error { color: #ffb9af; }
+      .invite { margin: 1rem 0 0; font-size: 1.35rem; color: #bdd5dc; }
+      .invite a { color: #a9eaf7; }
+      a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid white; outline-offset: 4px; }
       .stage { position: relative; display: grid; place-items: center; min-height: 480px; isolation: isolate; }
       .pixel-halo { position: absolute; z-index: -1; width: min(100%, 490px); height: auto; image-rendering: pixelated; }
       .mascot-runner { width: min(100%, 450px); animation: scurry 3s ease-in-out infinite; }
@@ -43,6 +53,7 @@
         .mascot-runner { width: min(76vw, 320px); }
         .copy { grid-row: 2; }
         .tagline { margin: 1.2rem auto 2rem; }
+        .waitlist { margin: 0 auto; flex-direction: column; }
       }
       @media (prefers-reduced-motion: reduce) {
         .mascot-runner, .tentacle-left, .tentacle-right, .spark { animation: none; }
@@ -60,7 +71,14 @@
         <p class="eyebrow">Meet your new sidekick</p>
         <h1>Fizz.</h1>
         <p class="tagline">The physical layer for AI agents.</p>
-        <a href="/app.html">Enter Fizz</a>
+        <p class="waitlist-intro">Fizz is invite-only for now. Join the waitlist.</p>
+        <form class="waitlist" id="waitlist" novalidate>
+          <label class="visually-hidden" for="waitlist-email">Email address</label>
+          <input id="waitlist-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com">
+          <button type="submit">Join the waitlist</button>
+        </form>
+        <p class="waitlist-status" id="waitlist-status" role="status" aria-live="polite"></p>
+        <p class="invite">Have an invite? <a href="/app.html">Create your account</a> · <a href="/app.html#sign-in">Sign in</a></p>
       </div>
       <div class="stage">
         <svg class="pixel-halo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" shape-rendering="crispEdges">
@@ -92,5 +110,35 @@
         </div>
       </div>
     </main>
+    <script>
+      const waitlist = document.getElementById('waitlist');
+      const status = document.getElementById('waitlist-status');
+      waitlist.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const input = document.getElementById('waitlist-email');
+        const button = waitlist.querySelector('button');
+        status.classList.remove('error');
+        if (!input.checkValidity()) {
+          status.classList.add('error');
+          status.textContent = 'Enter a valid email address.';
+          input.focus();
+          return;
+        }
+        button.disabled = true;
+        status.textContent = 'Adding you…';
+        try {
+          const response = await fetch('/api/waitlist', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: input.value.trim() }) });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error?.message || 'Something went wrong. Try again.');
+          waitlist.reset();
+          status.textContent = "You're on the list. We'll email you when your invite is ready.";
+        } catch (error) {
+          status.classList.add('error');
+          status.textContent = error instanceof TypeError ? 'Could not reach Fizz. Check your connection and try again.' : error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    </script>
   </body>
 </html>

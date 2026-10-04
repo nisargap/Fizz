@@ -26,6 +26,7 @@ label { display: block; margin-bottom: .45rem; font-size: 1.5rem; }
 input { width: 100%; border: 2px solid #69bed0; border-radius: 0; background: #071b29; color: #fff; font-size: 1.85rem; padding: .65rem .8rem; }
 input::placeholder { color: #7b9daa; }
 .hint { color: #bfd5dc; font-size: 1.2rem; margin: .55rem 0 1.6rem; }
+.hint a { color: #a9eaf7; }
 .chosen { display: flex; align-items: baseline; gap: .7rem; border-bottom: 2px solid #31546a; padding-bottom: .7rem; margin-bottom: 1.5rem; font-size: 1.3rem; }
 .chosen span { color: #bfd5dc; }
 .chosen strong { color: #a9eaf7; font-weight: 400; font-size: 1.6rem; overflow-wrap: anywhere; }

@@ -41,9 +41,19 @@ After deployment, `GET /api/status` reports `database: "connected"` when Supabas
 
 ## Customer onboarding
 
-Open `/app.html` to create an account. Usernames are unique, case-insensitive, and limited to 3–24 letters, numbers, and underscores; they must start with a letter. Customers choose a six digit access code and confirm it. The code is stored as a bcrypt hash in Supabase. After registration or sign-in, a random session token is stored only as a hash and sent in a 12 hour HttpOnly, Secure, SameSite=Lax cookie. Five incorrect codes lock that username for 15 minutes.
+Fizz is invite-only. The landing page collects emails for a waitlist through `POST /api/waitlist`, which stores lowercased addresses in `fizz_waitlist`. It answers the same way for new and duplicate addresses, accepts at most 5 sign-ups per client IP per hour and 500 overall per hour, and returns `429` past those limits. IPs come from Vercel's `x-real-ip` header and are stored only as SHA-256 hashes in `fizz_rate_limits`.
 
-Apply the migration with `supabase db push --project-ref <project-ref>`, then set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel. The browser calls only Fizz's `/api/onboarding`, `/api/session`, and `/api/me` endpoints; it never receives a Supabase key.
+New accounts need a single-use invite code such as `FIZZ-ABCD-EFGH-JKMN` (60 random bits). Mint codes in the Supabase SQL editor; each plaintext code is shown only once and only its hash is stored:
+
+```sql
+select * from public.fizz_create_invites(5, 'Hackathon judges', interval '14 days');
+```
+
+Codes are case-insensitive, and dashes, spaces, and the `FIZZ` prefix are optional. A code is consumed in the same transaction that creates the account, so a failed registration leaves it unused. Registration allows 10 attempts per client IP per hour. Existing accounts sign in as before. To see who has used a code, query `fizz_invite_codes.used_by`.
+
+Open `/app.html` with an invite code to create an account. Usernames are unique, case-insensitive, and limited to 3–24 letters, numbers, and underscores; they must start with a letter. Customers choose a six digit access code and confirm it. The code is stored as a bcrypt hash in Supabase. After registration or sign-in, a random session token is stored only as a hash and sent in a 12 hour HttpOnly, Secure, SameSite=Lax cookie. Five incorrect codes lock that username for 15 minutes.
+
+Apply the migration with `supabase db push --project-ref <project-ref>`, then set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel. The browser calls only Fizz's `/api/waitlist`, `/api/onboarding`, `/api/session`, and `/api/me` endpoints; it never receives a Supabase key.
 
 After sign-in, new accounts choose sensor types and press **Start with sample data**. Fizz creates simulated sensors and opens the dashboard. Existing choices migrate into sensor instances. Simulated values advance when an authenticated dashboard or Sensors page requests data, at most once per 15 seconds per sensor; the browser polls while open.
 

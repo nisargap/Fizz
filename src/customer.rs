@@ -1,8 +1,10 @@
+use std::net::IpAddr;
+
 use http_body_util::{BodyExt, Limited};
 use serde_json::{Value, json};
 use vercel_runtime::{Request, Response, ResponseBody};
 
-use crate::store::{StoreError, Supabase};
+use crate::store::Supabase;
 
 const COOKIE_NAME: &str = "fizz_session";
 
@@ -28,7 +30,7 @@ pub fn error(status: u16, code: &str, message: &str) -> Response<ResponseBody> {
     )
 }
 
-pub async fn credentials(request: Request) -> Result<(String, String), Response<ResponseBody>> {
+pub async fn json_body(request: Request, limit: usize) -> Result<Value, Response<ResponseBody>> {
     let is_json = request
         .headers()
         .get("content-type")
@@ -37,18 +39,28 @@ pub async fn credentials(request: Request) -> Result<(String, String), Response<
     if !is_json {
         return Err(error(415, "unsupported_media_type", "Send JSON."));
     }
-    let bytes = Limited::new(request.into_body(), 1024)
+    let bytes = Limited::new(request.into_body(), limit)
         .collect()
         .await
         .map_err(|_| error(413, "invalid_request", "Request is too large."))?
         .to_bytes();
-    let data: Value = serde_json::from_slice(&bytes).map_err(|_| {
-        error(
-            400,
-            "invalid_request",
-            "Enter a username and six digit code.",
-        )
-    })?;
+    serde_json::from_slice(&bytes).map_err(|_| error(400, "invalid_request", "Send a JSON object."))
+}
+
+/// The caller's IP for rate limiting. Vercel sets `x-real-ip` and overwrites
+/// `x-forwarded-for`, so clients cannot choose these values in production.
+pub fn client_ip(request: &Request) -> Option<String> {
+    ip_from_headers(|name| request.headers().get(name).and_then(|v| v.to_str().ok()))
+}
+
+fn ip_from_headers<'a>(header: impl Fn(&str) -> Option<&'a str>) -> Option<String> {
+    header("x-real-ip")
+        .or_else(|| header("x-forwarded-for").and_then(|v| v.split(',').next()))
+        .and_then(|v| v.trim().parse::<IpAddr>().ok())
+        .map(|ip| ip.to_string())
+}
+
+fn parse_credentials(data: &Value) -> Result<(String, String), Response<ResponseBody>> {
     let username = data
         .get("username")
         .and_then(Value::as_str)
@@ -76,6 +88,23 @@ pub async fn credentials(request: Request) -> Result<(String, String), Response<
     Ok((username, code))
 }
 
+pub async fn credentials(request: Request) -> Result<(String, String), Response<ResponseBody>> {
+    parse_credentials(&json_body(request, 1024).await?)
+}
+
+/// Invite codes look like FIZZ-ABCD-EFGH-JKMN. The database normalizes and checks them;
+/// this only rejects input that cannot possibly be a code.
+fn invite_code(data: &Value) -> Option<String> {
+    let invite = data.get("invite").and_then(Value::as_str)?.trim();
+    let symbols = invite.bytes().filter(u8::is_ascii_alphanumeric).count();
+    ((12..=16).contains(&symbols)
+        && invite.len() <= 32
+        && invite
+            .bytes()
+            .all(|c| c.is_ascii_alphanumeric() || c == b'-' || c == b' '))
+    .then(|| invite.to_owned())
+}
+
 pub fn session_token(request: &Request) -> Option<String> {
     request
         .headers()
@@ -98,9 +127,21 @@ pub fn clear_cookie() -> &'static str {
 }
 
 pub async fn register(request: Request) -> Response<ResponseBody> {
-    let (username, code) = match credentials(request).await {
+    let ip = client_ip(&request);
+    let data = match json_body(request, 1024).await {
         Ok(value) => value,
         Err(response) => return response,
+    };
+    let (username, code) = match parse_credentials(&data) {
+        Ok(value) => value,
+        Err(response) => return response,
+    };
+    let Some(invite) = invite_code(&data) else {
+        return error(
+            400,
+            "invalid_invite",
+            "Enter the invite code from your Fizz invitation.",
+        );
     };
     let Ok(store) = Supabase::from_env() else {
         return error(
@@ -112,14 +153,31 @@ pub async fn register(request: Request) -> Response<ResponseBody> {
     match store
         .rpc(
             "fizz_register",
-            json!({"p_username": username, "p_code": code}),
+            json!({"p_username": username, "p_code": code, "p_invite": invite, "p_ip": ip}),
         )
         .await
     {
-        Ok(value) => account_reply(value),
-        Err(StoreError::Conflict) => {
-            error(409, "username_taken", "That username is already taken.")
-        }
+        Ok(value) => match value.get("error").and_then(Value::as_str) {
+            None => account_reply(value),
+            Some("rate_limited") => error(
+                429,
+                "rate_limited",
+                "Too many attempts. Try again in an hour.",
+            ),
+            Some("invalid_invite") => error(
+                403,
+                "invalid_invite",
+                "That invite code is not valid or has already been used.",
+            ),
+            Some("username_taken") => {
+                error(409, "username_taken", "That username is already taken.")
+            }
+            Some(_) => error(
+                400,
+                "invalid_credentials",
+                "Use 3–24 lowercase letters, numbers, or underscores for the username and exactly six digits for the code.",
+            ),
+        },
         Err(_) => error(
             503,
             "database_unavailable",
@@ -328,5 +386,45 @@ async fn update_sensor(request: Request, removing: bool) -> Response<ResponseBod
             "database_unavailable",
             "Sensor setup is temporarily unavailable.",
         ),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn invite_codes_accept_typed_variants_and_reject_junk() {
+        let code = |v: &str| invite_code(&json!({ "invite": v }));
+        assert_eq!(
+            code(" FIZZ-ABCD-EFGH-JKMN "),
+            Some("FIZZ-ABCD-EFGH-JKMN".into())
+        );
+        assert!(code("abcd efgh jkmn").is_some());
+        assert!(code("FIZZ-ABCD").is_none());
+        assert!(code("FIZZ-ABCD-EFGH-JKMN-PQRS").is_none());
+        assert!(code("FIZZ_ABCD_EFGH_JKMN").is_none());
+        assert!(invite_code(&json!({})).is_none());
+    }
+
+    #[test]
+    fn client_ip_prefers_real_ip_and_ignores_non_addresses() {
+        let ip = |headers: &[(&'static str, &'static str)]| {
+            let headers = headers.to_vec();
+            ip_from_headers(move |name| headers.iter().find(|(n, _)| *n == name).map(|(_, v)| *v))
+        };
+        assert_eq!(
+            ip(&[
+                ("x-real-ip", "203.0.113.9"),
+                ("x-forwarded-for", "198.51.100.1")
+            ]),
+            Some("203.0.113.9".into())
+        );
+        assert_eq!(
+            ip(&[("x-forwarded-for", "2001:db8::1, 10.0.0.1")]),
+            Some("2001:db8::1".into())
+        );
+        assert_eq!(ip(&[("x-real-ip", "not-an-ip")]), None);
+        assert_eq!(ip(&[]), None);
     }
 }
