@@ -108,7 +108,11 @@
 .chat-compose { display: flex; gap: .4rem; }
 .chat-compose input { min-width: 0; font-size: 1.3rem; padding: .45rem .6rem; }
 .chat-compose button { font-size: 1.6rem; padding: .3rem .8rem; }
-.proposal-button { margin-top: .75rem; border: 2px solid #a9eaf7; background: #a9eaf7; color: #0b1722; padding: .3rem .5rem; font-size: 1.15rem; }
+.chat-voice { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; margin-top: .75rem; }
+.chat-voice button { flex: none; padding: .35rem .7rem; font-size: 1.25rem; }
+.chat-voice button.recording { color: #0b1722; background: #a9eaf7; }
+.chat-voice-status { flex: 1; min-width: 180px; margin: 0; color: #a9eaf7; font-size: 1.05rem; }
+.chat-voice audio { width: 100%; height: 40px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (max-width: 950px) { .dashboard-grid { grid-template-columns: 1fr; } .chat-panel { min-height: 460px; position: static; } }
 @media (max-width: 640px) { .dashboard-bar { flex-wrap: wrap; gap: .7rem; } .dashboard-account { width: 100%; justify-content: space-between; } .dashboard-heading img { width: 70px; height: 70px; } .live-sensors { grid-template-columns: 1fr; } .quick-alert-fields { grid-template-columns: 1fr 1fr; } .quick-alert-fields input:first-of-type { grid-column: 1 / -1; } .quick-alert-fields .primary { grid-column: 1 / -1; } }

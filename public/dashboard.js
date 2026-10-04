@@ -13,9 +13,13 @@
   let requestInFlight = false;
   let refreshQueued = false;
   let sessionGeneration = 0;
+  let chatHistory = [];
+  let chatBusy = false;
+  let voiceLocked = false;
+  let chatController = null;
 
-  async function api(path, method = 'GET', body) {
-    const response = await fetch(path, { method, credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  async function api(path, method = 'GET', body, signal) {
+    const response = await fetch(path, { method, credentials: 'same-origin', signal, headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || 'Please try again.');
     return data;
@@ -287,9 +291,9 @@
     return item;
   }
 
-  function proposalSummary(proposal) {
-    const sensor = sensors.find((item) => item.id === proposal.sensor_id);
-    const summary = node('p', 'alert-meta', `${sensorName(sensor)} · ${kinds.metricLabel(proposal.metric)} ${limitText(proposal)}`);
+  function createdAlertSummary(rule) {
+    const sensor = sensors.find((item) => item.id === rule.sensor_id);
+    const summary = node('p', 'alert-meta', `Active alert · ${sensorName(sensor)} · ${kinds.metricLabel(rule.metric)} ${limitText(rule)}`);
     summary.style.setProperty('--sensor-color', kinds.get(sensor?.kind).color);
     return summary;
   }
@@ -297,6 +301,60 @@
   function setThinking(active) {
     $('dashboard').classList.toggle('fizz-thinking', active);
   }
+
+  function updateChatControls() {
+    $('chat-form').querySelector('button[type=submit]').disabled = chatBusy || voiceLocked;
+    $('chat-input').disabled = chatBusy || voiceLocked;
+    window.fizzChatVoice?.setBusy(chatBusy);
+  }
+
+  async function sendMessage(message) {
+    if (chatBusy || !message || $('dashboard').hidden) return null;
+    $('chat-error').textContent = '';
+    appendMessage('user', message);
+    chatBusy = true;
+    updateChatControls();
+    const pending = appendThinking();
+    setThinking(true);
+    const version = sessionGeneration;
+    const controller = new AbortController();
+    chatController = controller;
+    try {
+      const result = await api('/api/chat', 'POST', { message, history: chatHistory.slice(-12) }, controller.signal);
+      if (version !== sessionGeneration || $('dashboard').hidden) return null;
+      pending.classList.remove('thinking');
+      pending.querySelector('p').textContent = result.reply || 'I could not find an answer.';
+      window.fizzVoiceClips.attach(pending, result.clips);
+      chatHistory.push({ role: 'user', content: message }, { role: 'assistant', content: result.reply });
+      chatHistory = chatHistory.slice(-12);
+      if (result.rule) {
+        pending.append(createdAlertSummary(result.rule));
+        await refresh();
+      }
+      $('chat-messages').scrollTop = $('chat-messages').scrollHeight;
+      return result;
+    } catch (error) {
+      if (version === sessionGeneration && error.name !== 'AbortError') {
+        pending.classList.remove('thinking');
+        pending.querySelector('p').textContent = 'I could not answer right now.';
+        $('chat-error').textContent = error.message;
+      }
+      return null;
+    } finally {
+      if (version === sessionGeneration) {
+        chatBusy = false;
+        chatController = null;
+        setThinking(false);
+        updateChatControls();
+        if (!voiceLocked) $('chat-input').focus();
+      }
+    }
+  }
+
+  window.fizzChat = {
+    send: sendMessage,
+    lock(active) { voiceLocked = active; updateChatControls(); },
+  };
 
   $('alert-sensor').addEventListener('change', updateMetricHint);
   $('alert-metric').addEventListener('input', () => { $('alert-metric').dataset.autofill = 'false'; });
@@ -327,46 +385,10 @@
     event.preventDefault();
     const input = $('chat-input');
     const message = input.value.trim();
-    if (!message) return;
+    if (!message || chatBusy || voiceLocked) return;
     input.value = '';
-    $('chat-error').textContent = '';
-    appendMessage('user', message);
-    const button = $('chat-form').querySelector('button[type=submit]');
-    button.disabled = true;
-    const pending = appendThinking();
-    setThinking(true);
-    const version = sessionGeneration;
-    try {
-      const result = await api('/api/chat', 'POST', { message });
-      if (version !== sessionGeneration || $('dashboard').hidden) return;
-      pending.classList.remove('thinking');
-      pending.querySelector('p').textContent = result.reply || 'I could not find an answer.';
-      window.fizzVoiceClips.attach(pending, result.clips);
-      if (result.proposal) {
-        const confirm = node('button', 'proposal-button', 'Activate this alert');
-        confirm.type = 'button';
-        confirm.addEventListener('click', async () => {
-          confirm.disabled = true;
-          try {
-            await api('/api/alerts', 'POST', result.proposal);
-            confirm.textContent = 'Alert active ✓';
-            await refresh();
-          } catch (error) { $('chat-error').textContent = error.message; confirm.disabled = false; }
-        });
-        pending.append(proposalSummary(result.proposal), confirm);
-      }
-      $('chat-messages').scrollTop = $('chat-messages').scrollHeight;
-    } catch (error) {
-      if (version === sessionGeneration) {
-        pending.classList.remove('thinking');
-        pending.querySelector('p').textContent = 'I could not answer right now.';
-        $('chat-error').textContent = error.message;
-      }
-    }
-    finally {
-      button.disabled = false;
-      if (version === sessionGeneration) { setThinking(false); input.focus(); }
-    }
+    window.fizzChatVoice?.stopPlayback();
+    await sendMessage(message);
   });
 
   window.fizzDashboard = {
@@ -379,9 +401,17 @@
       if (timer) clearInterval(timer);
       refresh();
       timer = setInterval(refresh, 5000);
+      window.fizzChatVoice?.start();
     },
     stop() {
       sessionGeneration++;
+      chatController?.abort();
+      chatController = null;
+      chatHistory = [];
+      chatBusy = false;
+      voiceLocked = false;
+      window.fizzChatVoice?.reset();
+      updateChatControls();
       if (timer) clearInterval(timer);
       timer = null;
       sensors = [];

@@ -58,7 +58,8 @@ The Sensors page can create additional sensors, switch a sensor to API mode, rot
 | `POST /api/ingest` | Send readings using a sensor API key |
 | `GET`, `POST`, `DELETE /api/phone` | Pair and revoke phone devices; phone posts motion, voice, and location data |
 | `GET`, `POST`, `PATCH`, `DELETE /api/alerts` | View and manage threshold rules |
-| `POST /api/chat` | Ask Fizz about readings and propose alerts |
+| `POST /api/chat` | Ask Fizz about readings and create alerts directly |
+| `GET`, `POST /api/voice` | Check voice availability, transcribe microphone audio, and speak agent replies (session cookie) |
 
 For API ingestion, use a unique `event_id` for each sample; retries with the same ID are idempotent. Metrics are validated against the sensor type. For example, a Temperature sensor accepts `temperature_c`:
 
@@ -80,7 +81,18 @@ Alerts are evaluated in Supabase whenever a numeric reading is inserted. An aler
 
 Create an AgentPhone agent and attach a voice-enabled phone number to it. Calls use the agent's first attached number. Existing SMS rules are kept as dashboard alerts, and queued texts are skipped. Calls speak the alert as their greeting and use a short hosted conversation to repeat it if needed; Fizz disables audio recording for these calls. The delivery status means the provider accepted the send, rather than confirming receipt on the recipient's device.
 
-Notifications are only sent where the AgentPhone key is set, so preview deployments sharing the database leave queued alerts for production. Chat uses Vercel AI Gateway to answer from stored customer readings and can propose an alert, which only becomes active after the customer confirms it. An AI outage does not stop ingestion or alert evaluation.
+Notifications are only sent where the AgentPhone key is set, so preview deployments sharing the database leave queued alerts for production. Chat uses Vercel AI Gateway to answer from stored customer readings and creates alerts directly when the customer clearly asks. It asks for missing details, validates the owned sensor and reported numeric metric/unit, and reports success only after the database saves the rule. Identical active alerts are reused. Phone calls are enabled only when requested with a US number supplied in the conversation. The browser includes up to 12 recent messages so follow-up instructions work; history is cleared at sign-out. An AI outage does not stop ingestion or alert evaluation.
+
+## Talk to Fizz
+
+The dashboard's **Talk to Fizz** button records one spoken turn (up to 30 seconds). Tap **Send recording** to submit it. ElevenLabs transcribes it, the same Fizz chat agent answers or creates an alert, and ElevenLabs speaks the reply. Replies remain visible in chat, and audio controls provide playback if the browser blocks autoplay. The microphone stops after each recording and on sign-out. Fizz does not save these microphone recordings; audio is sent to ElevenLabs for transcription, subject to the provider's retention policy.
+
+| Variable | Value |
+| --- | --- |
+| `ELEVENLABS_API_KEY` | Server-only ElevenLabs API key with speech-to-text and text-to-speech permissions; store it as a Vercel Production Secret |
+| `ELEVENLABS_VOICE_ID` | Optional voice ID; defaults to George (`JBFqnCBsd6RMkjVDRZzb`) |
+
+Speech uses ElevenLabs `scribe_v2` transcription and `eleven_multilingual_v2` synthesis. This is voice chat inside Fizz; outbound threshold-alert calls continue to use AgentPhone. Typed chat stays available when speech or microphone access is unavailable.
 
 ## Supabase Compute
 
