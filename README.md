@@ -41,7 +41,7 @@ After deployment, `GET /api/status` reports `database: "connected"` when Supabas
 
 ## Customer onboarding
 
-Fizz is invite-only. The landing page collects emails for a waitlist through `POST /api/waitlist`, which stores lowercased addresses in `fizz_waitlist`. It answers the same way for new and duplicate addresses, accepts at most 5 sign-ups per client IP per hour and 500 overall per hour, and returns `429` past those limits. IPs come from Vercel's `x-real-ip` header and are stored only as SHA-256 hashes in `fizz_rate_limits`.
+Fizz is invite-only. The landing page collects emails for a waitlist through `POST /api/waitlist`, which stores lowercased addresses in `fizz_waitlist`. It answers the same way for new and duplicate addresses, accepts at most 20 sign-ups per client IP per hour and 5,000 overall per hour, and returns `429` past those limits. IPs come from Vercel's `x-real-ip` header and are stored only as SHA-256 hashes in `fizz_rate_limits`.
 
 New accounts need a single-use invite code such as `FIZZ-ABCD-EFGH-JKMN` (60 random bits). Mint codes in the Supabase SQL editor; each plaintext code is shown only once and only its hash is stored:
 
