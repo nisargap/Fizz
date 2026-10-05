@@ -26,10 +26,21 @@
       :root { color-scheme: dark; font-family: "VT323", monospace; }
       * { box-sizing: border-box; }
       .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-      html { scroll-behavior: smooth; }
+      html { scroll-behavior: smooth; scroll-padding-top: 5.5rem; }
       body { margin: 0; overflow-x: hidden; background: #0b1722; color: #f4f9fa; }
       main { position: relative; z-index: 1; }
-      .hero { width: min(1100px, calc(100% - 3rem)); min-height: 100vh; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(2rem, 5vw, 5rem); }
+      .site-nav { position: sticky; top: 0; z-index: 10; background: rgba(11, 23, 34, .94); border-bottom: 2px solid #1a4050; }
+      .site-nav nav { position: relative; width: min(1100px, calc(100% - 3rem)); min-height: 4.5rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+      .nav-logo { font-size: 2.4rem; color: #f4f9fa; text-decoration: none; }
+      .nav-logo span { color: #a9eaf7; }
+      .nav-links { display: flex; align-items: center; gap: 1.6rem; margin: 0; padding: 0; list-style: none; }
+      .nav-links a { font-size: 1.45rem; color: #bdd5dc; text-decoration: none; }
+      .nav-links a:hover, .nav-links a[aria-current="true"] { color: #a9eaf7; }
+      .nav-links a[aria-current="true"] { text-decoration: underline; text-underline-offset: 6px; }
+      .nav-links .nav-cta { color: #0b1722; background: #a9eaf7; padding: .35rem .9rem; border-radius: .45rem; }
+      .nav-links .nav-cta:hover { color: #0b1722; background: #d1f7ff; }
+      .nav-toggle { display: none; font: inherit; font-size: 1.45rem; color: #a9eaf7; background: none; border: 2px solid #3f8ea3; padding: .2rem .8rem; cursor: pointer; }
+      .hero { width: min(1100px, calc(100% - 3rem)); min-height: calc(100vh - 4.5rem); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(2rem, 5vw, 5rem); }
       .copy { position: relative; z-index: 1; }
       .eyebrow { margin: 0 0 1rem; color: #9ce6f7; font-size: 1.25rem; letter-spacing: .15em; text-transform: uppercase; }
       h1 { margin: 0; font-size: clamp(7rem, 16vw, 12rem); line-height: .8; }
@@ -69,7 +80,38 @@
       .closing { padding-bottom: 6rem; text-align: center; }
       .closing a { display: inline-block; margin-top: .6rem; font-size: 1.6rem; color: #0b1722; background: #a9eaf7; padding: .65rem 1.3rem; border-radius: .45rem; text-decoration: none; }
       .closing a:hover { background: #d1f7ff; }
+      .ent-points { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin: 2rem 0 0; padding: 0; list-style: none; }
+      .ent-points li { padding-left: 1rem; border-left: 3px solid #3f8ea3; font-size: 1.4rem; line-height: 1.15; color: #bdd5dc; }
+      .ent-points strong { display: block; font-weight: 400; font-size: 1.6rem; color: #f4f9fa; }
+      .business { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 2rem; margin-top: 3rem; padding: 2rem; background: #102838; border: 4px solid #3f8ea3; box-shadow: 10px 10px 0 #071724; }
+      .business h3 { margin: 0 0 .8rem; font-size: 2.6rem; font-weight: 400; line-height: 1; }
+      .business p { margin: 0; font-size: 1.45rem; line-height: 1.15; color: #bdd5dc; }
+      .business form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .business label { display: block; margin-bottom: .35rem; font-size: 1.3rem; color: #d8f9ff; }
+      .business .wide { grid-column: 1 / -1; }
+      .business input, .business textarea { width: 100%; font: inherit; font-size: 1.45rem; color: #fff; background: #071b29; border: 2px solid #69bed0; border-radius: 0; padding: .45rem .7rem; }
+      .business textarea { resize: vertical; min-height: 5.5rem; }
+      .business input::placeholder, .business textarea::placeholder { color: #7b9daa; }
+      .business button { justify-self: start; font: inherit; font-size: 1.5rem; color: #0b1722; background: #a9eaf7; border: 0; border-radius: .45rem; padding: .6rem 1.2rem; cursor: pointer; }
+      .business button:hover { background: #d1f7ff; }
+      .business button:disabled { opacity: .6; cursor: wait; }
+      .business .form-status { min-height: 1.6rem; font-size: 1.35rem; color: #bdd5dc; }
+      .business .form-status.error { color: #ffb9af; }
+      .dim { color: #7b9daa; }
+      .closing p { margin: 1.4rem 0 0; font-size: 1.45rem; color: #bdd5dc; }
+      .closing p a { display: inline; margin: 0; padding: 0; font-size: inherit; color: #a9eaf7; background: none; text-decoration: underline; }
+      .closing p a:hover { background: none; color: #d1f7ff; }
+      textarea:focus-visible { outline: 3px solid white; outline-offset: 4px; }
       @media (max-width: 1000px) { .use-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 860px) {
+        .nav-toggle { display: block; }
+        .nav-links { display: none; position: absolute; top: 100%; left: -1.5rem; right: -1.5rem; flex-direction: column; align-items: stretch; gap: 0; padding: .4rem 1.5rem 1.2rem; background: #0b1722; border-bottom: 2px solid #1a4050; }
+        .nav-links.open { display: flex; }
+        .nav-links a { display: block; padding: .7rem 0; }
+        .nav-links .nav-cta { margin-top: .5rem; text-align: center; }
+        .business { grid-template-columns: 1fr; }
+        .ent-points { grid-template-columns: 1fr; }
+      }
       .stage { position: relative; display: grid; place-items: center; min-height: 480px; isolation: isolate; }
       .pixel-halo { position: absolute; z-index: -1; width: min(100%, 490px); height: auto; image-rendering: pixelated; }
       .mascot-runner { width: min(100%, 450px); animation: scurry 3s ease-in-out infinite; }
@@ -86,6 +128,8 @@
         .hero { grid-template-columns: 1fr; gap: 0; min-height: 0; padding: 4rem 0 3rem; text-align: center; }
         .section { padding: 3rem 0; }
         .use-grid { grid-template-columns: 1fr; }
+        .business { padding: 1.4rem; }
+        .business form { grid-template-columns: 1fr; }
         .stage { grid-row: 1; min-height: 310px; }
         .mascot-runner { width: min(76vw, 320px); }
         .copy { grid-row: 2; }
@@ -104,9 +148,22 @@
       <span class="shooting-star shooting-star-two"></span>
       <span class="shooting-star shooting-star-three"></span>
     </div>
+    <header class="site-nav">
+      <nav aria-label="Main">
+        <a class="nav-logo" href="#top" aria-label="Fizz, back to top">Fizz<span>.</span></a>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">Menu</button>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="#use-cases">Use cases</a></li>
+          <li><a href="#enterprise">Enterprise</a></li>
+          <li><a href="/app.html#sign-in">Sign in</a></li>
+          <li><a class="nav-cta" href="#join">Join waitlist</a></li>
+        </ul>
+      </nav>
+    </header>
     <main>
-      <section class="hero">
-        <div class="copy">
+      <section class="hero" id="top">
+        <div class="copy" id="join">
           <p class="eyebrow">Meet your new sidekick</p>
           <h1>Fizz.</h1>
           <p class="tagline">The physical layer for AI agents.</p>
@@ -212,15 +269,89 @@
         </div>
         <p class="uses-more">Also: pressure, radio signal strength, and custom metrics from any device that can send an HTTPS request.</p>
       </section>
+      <section class="section enterprise" id="enterprise" aria-labelledby="enterprise-title">
+        <p class="eyebrow">Enterprise</p>
+        <h2 id="enterprise-title">Every sensor on site. One agent watching.</h2>
+        <p class="lede">Warehouses, fleets, and factory floors already run on sensors. Fizz gives them one place to ask questions, and calls the right person when a reading crosses the line.</p>
+        <div class="use-grid">
+          <article class="use-card" style="--sensor-color:#ffd166">
+            <div class="use-head"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M7 1h2v1h-2zM5 2h6v1h-6zM3 3h10v1h-10zM1 4h14v1h-14zM0 5h16v2h-16zM1 7h14v9h-14z"/><path class="icon-cutout" d="M7 3h2v1h-2zM3 9h10v7h-10z"/><path d="M4 13h3v3h-3zM9 13h3v3h-3zM6 10h4v3h-4z"/></svg></span><span class="use-kind">Temperature · humidity · water</span></div>
+            <h3>Warehouses and cold storage</h3>
+            <p>Probes in every cold room, humidity on the racks, and leak sensors at the dock. Fizz watches every zone and calls the shift lead before stock spoils.</p>
+            <p class="ask"><span>ASK</span> “Which cold room is warmest right now?”</p>
+            <p class="alert"><span>ALERT</span> Call the shift lead if a cold room is above 5 °C</p>
+          </article>
+          <article class="use-card" style="--sensor-color:#7ad3ff">
+            <div class="use-head"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 3h10v8h-10zM10 5h3v6h-3zM13 7h2v4h-2zM0 11h15v1h-15zM2 12h3v3h-3zM10 12h3v3h-3z"/><path class="icon-cutout" d="M11 6h2v2h-2zM2 6h6v1h-6zM2 8h4v1h-4zM3 13h1v1h-1zM11 13h1v1h-1z"/></svg></span><span class="use-kind">Phone · temperature · API</span></div>
+            <h3>Logistics and fleets</h3>
+            <p>A driver's phone shares location and motion, and a reefer probe posts temperatures over HTTPS. Each device has its own key, so one truck can be cut off without touching the rest.</p>
+            <p class="ask"><span>ASK</span> “Is truck 12's reefer still under 4 °C?”</p>
+            <p class="alert"><span>ALERT</span> Call dispatch if a reefer is above 4 °C</p>
+          </article>
+          <article class="use-card" style="--sensor-color:#ff8f5e">
+            <div class="use-head"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M3 5h2v1h-2zM2 6h3v1h-3zM1 7h4v1h-4zM0 8h5v1h-5zM8 5h2v1h-2zM7 6h3v1h-3zM6 7h4v1h-4zM5 8h5v1h-5zM11 2h3v7h-3zM0 9h16v7h-16zM13 0h1v1h-1zM14 0h2v1h-2zM12 1h1v1h-1z"/><path class="icon-cutout" d="M2 11h2v2h-2zM6 11h2v2h-2zM10 11h2v2h-2zM12 13h3v3h-3z"/></svg></span><span class="use-kind">Pressure · sound · gas</span></div>
+            <h3>Factories and plants</h3>
+            <p>Boiler pressure, compressor noise, and air quality on the line. Check the floor from anywhere, and get a call when a machine drifts out of range.</p>
+            <p class="ask"><span>ASK</span> “What's boiler 2 pressure right now?”</p>
+            <p class="alert"><span>ALERT</span> Call maintenance if pressure is above 900 kPa</p>
+          </article>
+        </div>
+        <ul class="ent-points">
+          <li><strong>A key for every device</strong>Rotate or revoke one sensor's API key without touching the others.</li>
+          <li><strong>Try it before install day</strong>Start with simulated streams for each sensor type while hardware is on order.</li>
+          <li><strong>The right person gets the call</strong>Each alert rule calls its own phone number.</li>
+        </ul>
+        <div class="business" id="business">
+          <div>
+            <h3>Bring Fizz to your team</h3>
+            <p>Tell us about your sites and what you need to watch. We'll reach out about early access.</p>
+          </div>
+          <form id="business-form" novalidate>
+            <div>
+              <label for="business-email">Work email</label>
+              <input id="business-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@company.com">
+            </div>
+            <div>
+              <label for="business-company">Company</label>
+              <input id="business-company" name="company" type="text" autocomplete="organization" maxlength="120" required placeholder="Acme Logistics">
+            </div>
+            <div class="wide">
+              <label for="business-interest">What would you like Fizz to watch? <span class="dim">(optional)</span></label>
+              <textarea id="business-interest" name="interest" maxlength="500" rows="3" placeholder="e.g. Cold room temperatures across 3 warehouses"></textarea>
+            </div>
+            <button type="submit">Request early access</button>
+            <p class="form-status wide" id="business-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
       <section class="section closing" aria-labelledby="closing-title">
         <h2 id="closing-title">Give your AI agent a body.</h2>
-        <a href="#waitlist-email">Join the waitlist</a>
+        <a href="#join">Join the waitlist</a>
+        <p>Running a warehouse, fleet, or plant? <a href="#business">Request early access</a></p>
       </section>
     </main>
     <script>
       addEventListener('DOMContentLoaded', () => {
-        for (const card of document.querySelectorAll('.use-card')) card.querySelector('.use-head').prepend(window.fizzKinds.badge(card.dataset.kind));
+        for (const card of document.querySelectorAll('.use-card[data-kind]')) card.querySelector('.use-head').prepend(window.fizzKinds.badge(card.dataset.kind));
       });
+      // Mobile menu: toggle, close after choosing a link or pressing Escape.
+      const navToggle = document.getElementById('nav-toggle');
+      const navLinks = document.getElementById('nav-links');
+      const setMenu = (open) => { navLinks.classList.toggle('open', open); navToggle.setAttribute('aria-expanded', String(open)); };
+      navToggle.addEventListener('click', () => setMenu(!navLinks.classList.contains('open')));
+      navLinks.addEventListener('click', (event) => { if (event.target.closest('a')) setMenu(false); });
+      addEventListener('keydown', (event) => { if (event.key === 'Escape' && navLinks.classList.contains('open')) { setMenu(false); navToggle.focus(); } });
+      // Waitlist links scroll smoothly to the hero copy, then focus the field without jumping.
+      for (const link of document.querySelectorAll('a[href="#join"]')) {
+        link.addEventListener('click', () => setTimeout(() => document.getElementById('waitlist-email').focus({ preventScroll: true }), 500));
+      }
+      // Highlight the menu item for the section in view.
+      const navFor = new Map([...navLinks.querySelectorAll('a[href^="#"]')].map((a) => [a.getAttribute('href').slice(1), a]));
+      const sectionObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) navFor.get(entry.target.id)?.setAttribute('aria-current', String(entry.isIntersecting));
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      for (const id of navFor.keys()) { const section = document.getElementById(id); if (section?.tagName === 'SECTION') sectionObserver.observe(section); }
+
       const waitlist = document.getElementById('waitlist');
       const status = document.getElementById('waitlist-status');
       waitlist.addEventListener('submit', async (event) => {
@@ -245,6 +376,41 @@
         } catch (error) {
           status.classList.add('error');
           status.textContent = error instanceof TypeError ? 'Could not reach Fizz. Check your connection and try again.' : error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      const business = document.getElementById('business-form');
+      const businessStatus = document.getElementById('business-status');
+      business.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const email = document.getElementById('business-email');
+        const company = document.getElementById('business-company');
+        const button = business.querySelector('button');
+        businessStatus.classList.remove('error');
+        const invalid = !email.checkValidity() ? [email, 'Enter a valid work email.'] : !company.value.trim() ? [company, 'Enter your company name.'] : null;
+        if (invalid) {
+          businessStatus.classList.add('error');
+          businessStatus.textContent = invalid[1];
+          invalid[0].focus();
+          return;
+        }
+        button.disabled = true;
+        businessStatus.textContent = 'Sending…';
+        try {
+          const response = await fetch('/api/waitlist', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ kind: 'business', email: email.value.trim(), company: company.value.trim(), interest: document.getElementById('business-interest').value.trim() }),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error?.message || 'Something went wrong. Try again.');
+          businessStatus.textContent = `Thanks. We'll be in touch at ${email.value.trim().toLowerCase()}.`;
+          business.reset();
+        } catch (error) {
+          businessStatus.classList.add('error');
+          businessStatus.textContent = error instanceof TypeError ? 'Could not reach Fizz. Check your connection and try again.' : error.message;
         } finally {
           button.disabled = false;
         }
