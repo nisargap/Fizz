@@ -21,15 +21,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/sky.css">
+    <script src="/sensor-kinds.js" defer></script>
     <style>
       :root { color-scheme: dark; font-family: "VT323", monospace; }
       * { box-sizing: border-box; }
       .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-      body {
-        min-height: 100vh; margin: 0; display: grid; place-items: center; overflow-x: hidden;
-        background: #0b1722; color: #f4f9fa;
-      }
-      main { position: relative; z-index: 1; width: min(1100px, calc(100% - 3rem)); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(2rem, 5vw, 5rem); }
+      html { scroll-behavior: smooth; }
+      body { margin: 0; overflow-x: hidden; background: #0b1722; color: #f4f9fa; }
+      main { position: relative; z-index: 1; }
+      .hero { width: min(1100px, calc(100% - 3rem)); min-height: 100vh; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(2rem, 5vw, 5rem); }
       .copy { position: relative; z-index: 1; }
       .eyebrow { margin: 0 0 1rem; color: #9ce6f7; font-size: 1.25rem; letter-spacing: .15em; text-transform: uppercase; }
       h1 { margin: 0; font-size: clamp(7rem, 16vw, 12rem); line-height: .8; }
@@ -45,7 +45,31 @@
       .waitlist-status.error { color: #ffb9af; }
       .invite { margin: 1rem 0 0; font-size: 1.35rem; color: #bdd5dc; }
       .invite a { color: #a9eaf7; }
-      a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid white; outline-offset: 4px; }
+      .scroll-cue { display: inline-block; margin-top: 1.6rem; font-size: 1.45rem; color: #a9eaf7; text-decoration: none; }
+      .scroll-cue:hover { color: #d1f7ff; }
+      a:focus-visible, button:focus-visible, input:focus-visible, video:focus-visible { outline: 3px solid white; outline-offset: 4px; }
+      .section { width: min(1100px, calc(100% - 3rem)); margin: 0 auto; padding: 4rem 0; }
+      .section h2 { margin: 0 0 1rem; font-size: clamp(3rem, 6vw, 4.6rem); font-weight: 400; line-height: .95; }
+      .lede { max-width: 44rem; margin: 0 0 2rem; font-size: 1.6rem; line-height: 1.15; color: #bdd5dc; }
+      .video-frame { border: 4px solid #3f8ea3; background: #102838; box-shadow: 10px 10px 0 #071724; }
+      .video-frame video { display: block; width: 100%; height: auto; }
+      .use-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+      .use-card { display: flex; flex-direction: column; gap: .7rem; padding: 1.4rem; background: #102838; border: 3px solid var(--sensor-color); box-shadow: 8px 8px 0 #071724; }
+      .use-head { display: flex; align-items: center; gap: .9rem; }
+      .use-kind { font-size: 1.15rem; letter-spacing: .15em; color: var(--sensor-color); text-transform: uppercase; }
+      .use-card h3 { margin: 0; font-size: 2.1rem; font-weight: 400; line-height: 1; }
+      .use-card p { margin: 0; font-size: 1.4rem; line-height: 1.15; color: #bdd5dc; }
+      .use-card .ask { margin-top: auto; padding: .4rem .7rem; font-size: 1.35rem; color: #d8f9ff; background: #0b1f2b; border: 2px solid #3f8ea3; }
+      .use-card .ask span, .use-card .alert span { color: #7b9daa; letter-spacing: .1em; }
+      .use-card .alert { font-size: 1.35rem; color: var(--sensor-color); }
+      .kind-badge { display: inline-grid; place-items: center; flex: none; width: 3rem; height: 3rem; border: 3px solid var(--sensor-color); color: var(--sensor-color); background: #0b1f2b; }
+      .kind-badge svg { width: 1.9rem; height: 1.9rem; fill: currentColor; }
+      .kind-badge .icon-cutout { fill: #0b1f2b; }
+      .uses-more { margin: 2rem 0 0; font-size: 1.45rem; color: #bdd5dc; }
+      .closing { padding-bottom: 6rem; text-align: center; }
+      .closing a { display: inline-block; margin-top: .6rem; font-size: 1.6rem; color: #0b1722; background: #a9eaf7; padding: .65rem 1.3rem; border-radius: .45rem; text-decoration: none; }
+      .closing a:hover { background: #d1f7ff; }
+      @media (max-width: 1000px) { .use-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
       .stage { position: relative; display: grid; place-items: center; min-height: 480px; isolation: isolate; }
       .pixel-halo { position: absolute; z-index: -1; width: min(100%, 490px); height: auto; image-rendering: pixelated; }
       .mascot-runner { width: min(100%, 450px); animation: scurry 3s ease-in-out infinite; }
@@ -59,7 +83,9 @@
       @keyframes step-right { to { transform: translateY(-5px); } }
       @keyframes twinkle { to { opacity: .25; } }
       @media (max-width: 720px) {
-        main { grid-template-columns: 1fr; gap: 0; padding: 4rem 0 3rem; text-align: center; }
+        .hero { grid-template-columns: 1fr; gap: 0; min-height: 0; padding: 4rem 0 3rem; text-align: center; }
+        .section { padding: 3rem 0; }
+        .use-grid { grid-template-columns: 1fr; }
         .stage { grid-row: 1; min-height: 310px; }
         .mascot-runner { width: min(76vw, 320px); }
         .copy { grid-row: 2; }
@@ -68,6 +94,7 @@
       }
       @media (prefers-reduced-motion: reduce) {
         .mascot-runner, .tentacle-left, .tentacle-right, .spark { animation: none; }
+        html { scroll-behavior: auto; }
       }
     </style>
   </head>
@@ -78,50 +105,122 @@
       <span class="shooting-star shooting-star-three"></span>
     </div>
     <main>
-      <div class="copy">
-        <p class="eyebrow">Meet your new sidekick</p>
-        <h1>Fizz.</h1>
-        <p class="tagline">The physical layer for AI agents.</p>
-        <p class="waitlist-intro">Fizz is invite-only for now. Join the waitlist.</p>
-        <form class="waitlist" id="waitlist" novalidate>
-          <label class="visually-hidden" for="waitlist-email">Email address</label>
-          <input id="waitlist-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com">
-          <button type="submit">Join the waitlist</button>
-        </form>
-        <p class="waitlist-status" id="waitlist-status" role="status" aria-live="polite"></p>
-        <p class="invite">Have an invite? <a href="/app.html">Create your account</a> · <a href="/app.html#sign-in">Sign in</a></p>
-      </div>
-      <div class="stage">
-        <svg class="pixel-halo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" shape-rendering="crispEdges">
-          <path fill="#122d3d" d="M28 2h44v4h12v4h6v6h4v12h4v44h-4v12h-4v6h-6v4H72v4H28v-4H16v-4h-6v-6H6V72H2V28h4V16h4v-6h6V6h12z"/>
-          <path fill="#1a4050" d="M28 10h44v4h10v4h4v10h4v44h-4v10h-4v4H72v4H28v-4H18v-4h-4V72h-4V28h4V18h4v-4h10z"/>
-          <path fill="#102838" d="M30 18h40v4h10v8h4v40h-4v8H70v4H30v-4H20v-8h-4V30h4v-8h10z"/>
-        </svg>
-        <div class="mascot-runner">
-          <svg class="mascot" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fizz-title fizz-desc" shape-rendering="crispEdges">
-            <title id="fizz-title">Fizz the pixel mascot</title>
-            <desc id="fizz-desc">A friendly light blue creature with two dark block eyes and four little scurrying tentacles.</desc>
-            <path class="spark" d="M8 17h3v-3h2v3h3v2h-3v3h-2v-3H8z"/>
-            <path class="spark" d="M66 8h2V5h2v3h3v2h-3v3h-2v-3h-2z"/>
-            <path class="spark" d="M70 48h3v-3h2v3h3v2h-3v3h-2v-3h-3z"/>
-            <g class="tentacle-left" fill="#599cb5">
-              <path d="M22 52h10v10h-3v8h-8v-5h-3v-6h4z"/>
-              <path d="M43 54h9v11h-3v6h-8v-5h-3v-7h5z"/>
-            </g>
-            <g class="tentacle-right" fill="#80d7e9">
-              <path d="M32 55h9v9h-3v8h-8v-6h-3v-7h5z"/>
-              <path d="M53 52h8v8h-3v9h-8v-6h-3v-7h6z"/>
-            </g>
-            <path fill="#387991" d="M24 10h32v3h8v5h5v8h3v23h-3v7h-5v5h-8v3H24v-3h-8v-5h-5v-7H8V26h3v-8h5v-5h8z"/>
-            <path fill="#a9eaf7" d="M24 13h32v3h8v5h4v8h3v17h-3v8h-5v5h-8v3H25v-3h-8v-5h-5v-8H9V29h3v-8h5v-5h7z"/>
-            <path fill="#d8f9ff" d="M24 16h25v3H22v3h-5v5h-4v13h-1V29h3v-8h6v-3h3z"/>
-            <path fill="#82d4e9" d="M61 25h5v6h3v15h-3v7h-5v5h-8v3H30v-3h23v-3h8v-5h4v-8h2V31h-6z"/>
-            <path fill="#153849" d="M25 37h8v9h-8zm23 0h8v9h-8z"/>
-          </svg>
+      <section class="hero">
+        <div class="copy">
+          <p class="eyebrow">Meet your new sidekick</p>
+          <h1>Fizz.</h1>
+          <p class="tagline">The physical layer for AI agents.</p>
+          <p class="waitlist-intro">Fizz is invite-only for now. Join the waitlist.</p>
+          <form class="waitlist" id="waitlist" novalidate>
+            <label class="visually-hidden" for="waitlist-email">Email address</label>
+            <input id="waitlist-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com">
+            <button type="submit">Join the waitlist</button>
+          </form>
+          <p class="waitlist-status" id="waitlist-status" role="status" aria-live="polite"></p>
+          <p class="invite">Have an invite? <a href="/app.html">Create your account</a> · <a href="/app.html#sign-in">Sign in</a></p>
+          <a class="scroll-cue" href="#demo">Watch the 2-minute demo ↓</a>
         </div>
-      </div>
+        <div class="stage">
+          <svg class="pixel-halo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" shape-rendering="crispEdges">
+            <path fill="#122d3d" d="M28 2h44v4h12v4h6v6h4v12h4v44h-4v12h-4v6h-6v4H72v4H28v-4H16v-4h-6v-6H6V72H2V28h4V16h4v-6h6V6h12z"/>
+            <path fill="#1a4050" d="M28 10h44v4h10v4h4v10h4v44h-4v10h-4v4H72v4H28v-4H18v-4h-4V72h-4V28h4V18h4v-4h10z"/>
+            <path fill="#102838" d="M30 18h40v4h10v8h4v40h-4v8H70v4H30v-4H20v-8h-4V30h4v-8h10z"/>
+          </svg>
+          <div class="mascot-runner">
+            <svg class="mascot" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fizz-title fizz-desc" shape-rendering="crispEdges">
+              <title id="fizz-title">Fizz the pixel mascot</title>
+              <desc id="fizz-desc">A friendly light blue creature with two dark block eyes and four little scurrying tentacles.</desc>
+              <path class="spark" d="M8 17h3v-3h2v3h3v2h-3v3h-2v-3H8z"/>
+              <path class="spark" d="M66 8h2V5h2v3h3v2h-3v3h-2v-3h-2z"/>
+              <path class="spark" d="M70 48h3v-3h2v3h3v2h-3v3h-2v-3h-3z"/>
+              <g class="tentacle-left" fill="#599cb5">
+                <path d="M22 52h10v10h-3v8h-8v-5h-3v-6h4z"/>
+                <path d="M43 54h9v11h-3v6h-8v-5h-3v-7h5z"/>
+              </g>
+              <g class="tentacle-right" fill="#80d7e9">
+                <path d="M32 55h9v9h-3v8h-8v-6h-3v-7h5z"/>
+                <path d="M53 52h8v8h-3v9h-8v-6h-3v-7h6z"/>
+              </g>
+              <path fill="#387991" d="M24 10h32v3h8v5h5v8h3v23h-3v7h-5v5h-8v3H24v-3h-8v-5h-5v-7H8V26h3v-8h5v-5h8z"/>
+              <path fill="#a9eaf7" d="M24 13h32v3h8v5h4v8h3v17h-3v8h-5v5h-8v3H25v-3h-8v-5h-5v-8H9V29h3v-8h5v-5h7z"/>
+              <path fill="#d8f9ff" d="M24 16h25v3H22v3h-5v5h-4v13h-1V29h3v-8h6v-3h3z"/>
+              <path fill="#82d4e9" d="M61 25h5v6h3v15h-3v7h-5v5h-8v3H30v-3h23v-3h8v-5h4v-8h2V31h-6z"/>
+              <path fill="#153849" d="M25 37h8v9h-8zm23 0h8v9h-8z"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+      <section class="section demo" id="demo" aria-labelledby="demo-title">
+        <p class="eyebrow">See it in action</p>
+        <h2 id="demo-title">Fizz in two minutes.</h2>
+        <p class="lede">A walkthrough of the live app: pick sensors, watch readings stream in, ask Fizz what it sees, and get called when a reading crosses the line.</p>
+        <div class="video-frame">
+          <video controls preload="metadata" playsinline poster="/fizz-demo-poster.jpg" width="1920" height="1080">
+            <source src="/fizz-demo.mp4" type="video/mp4">
+            <track kind="captions" src="/fizz-demo.vtt" srclang="en" label="English">
+            Your browser cannot play this video. <a href="/fizz-demo.mp4">Download the demo</a>.
+          </video>
+        </div>
+      </section>
+      <section class="section uses" id="use-cases" aria-labelledby="uses-title">
+        <p class="eyebrow">Use cases</p>
+        <h2 id="uses-title">Watch the places you can't.</h2>
+        <p class="lede">Give Fizz a sensor and a limit. Ask about it in plain English, and get a phone call when something goes wrong.</p>
+        <div class="use-grid">
+          <article class="use-card" style="--sensor-color:#5cc8ff" data-kind="water">
+            <div class="use-head"><span class="use-kind">Flow · L/min</span></div>
+            <h3>Basement leak watch</h3>
+            <p>A flow sensor on the main line. Water moving at 3 AM when nobody is up means a leak, and Fizz calls you while it is still a puddle.</p>
+            <p class="ask"><span>ASK</span> “Was there any water flow overnight?”</p>
+            <p class="alert"><span>ALERT</span> Call me if flow is above 0.5 L/min</p>
+          </article>
+          <article class="use-card" style="--sensor-color:#9be07a" data-kind="gas">
+            <div class="use-head"><span class="use-kind">Gas · ppm</span></div>
+            <h3>Garage air check</h3>
+            <p>A second set of eyes beside your detector, near the furnace or workbench. Fizz keeps the history and calls when concentration climbs.</p>
+            <p class="ask"><span>ASK</span> “Did the garage air spike today?”</p>
+            <p class="alert"><span>ALERT</span> Call me if gas is above 1,000 ppm</p>
+          </article>
+          <article class="use-card" style="--sensor-color:#ff7b6b" data-kind="temperature">
+            <div class="use-head"><span class="use-kind">Temperature · °C</span></div>
+            <h3>Server closet heat</h3>
+            <p>A probe by the rack. When the AC quits on a Saturday, Fizz calls before your hardware starts to throttle.</p>
+            <p class="ask"><span>ASK</span> “What's the closet temperature right now?”</p>
+            <p class="alert"><span>ALERT</span> Call me if it is above 30 °C</p>
+          </article>
+          <article class="use-card" style="--sensor-color:#5ee6c4" data-kind="humidity">
+            <div class="use-head"><span class="use-kind">Humidity · %</span></div>
+            <h3>Greenhouse and grow rooms</h3>
+            <p>Know how your plants are doing before you drive over. Fizz watches the air where they live.</p>
+            <p class="ask"><span>ASK</span> “Is the greenhouse too dry?”</p>
+            <p class="alert"><span>ALERT</span> Call me if humidity drops below 40%</p>
+          </article>
+          <article class="use-card" style="--sensor-color:#ffa94d" data-kind="sound">
+            <div class="use-head"><span class="use-kind">Sound · dB</span></div>
+            <h3>Nursery and pet room</h3>
+            <p>A sound level sensor in the room. Fizz notices when it gets loud while you are out.</p>
+            <p class="ask"><span>ASK</span> “Has it been quiet in the nursery?”</p>
+            <p class="alert"><span>ALERT</span> Call me if sound is above 70 dB</p>
+          </article>
+          <article class="use-card" style="--sensor-color:#8c9dff" data-kind="phone">
+            <div class="use-head"><span class="use-kind">Phone · no hardware</span></div>
+            <h3>Your phone as a sensor</h3>
+            <p>Pair any phone with a one-time link to share motion, location, and voice notes, each behind its own permission.</p>
+            <p class="ask"><span>ASK</span> “What did my phone say?”</p>
+            <p class="alert"><span>CONTROL</span> Revoke the phone from either device</p>
+          </article>
+        </div>
+        <p class="uses-more">Also: pressure, radio signal strength, and custom metrics from any device that can send an HTTPS request.</p>
+      </section>
+      <section class="section closing" aria-labelledby="closing-title">
+        <h2 id="closing-title">Give your AI agent a body.</h2>
+        <a href="#waitlist-email">Join the waitlist</a>
+      </section>
     </main>
     <script>
+      addEventListener('DOMContentLoaded', () => {
+        for (const card of document.querySelectorAll('.use-card')) card.querySelector('.use-head').prepend(window.fizzKinds.badge(card.dataset.kind));
+      });
       const waitlist = document.getElementById('waitlist');
       const status = document.getElementById('waitlist-status');
       waitlist.addEventListener('submit', async (event) => {
