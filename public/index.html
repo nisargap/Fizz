@@ -80,6 +80,40 @@
       .closing { padding-bottom: 6rem; text-align: center; }
       .closing a { display: inline-block; margin-top: .6rem; font-size: 1.6rem; color: #0b1722; background: #a9eaf7; padding: .65rem 1.3rem; border-radius: .45rem; text-decoration: none; }
       .closing a:hover { background: #d1f7ff; }
+      .flow { display: grid; grid-template-columns: minmax(0, 1fr) 6rem minmax(0, 1.05fr) 6rem minmax(0, 1fr); align-items: center; margin: 1rem 0 2.5rem; }
+      .flow-col { display: grid; gap: .9rem; }
+      .flow-label { margin: 0 0 .2rem; font-size: 1.15rem; letter-spacing: .2em; color: #9ce6f7; text-transform: uppercase; }
+      .node { display: flex; align-items: center; gap: .8rem; padding: .7rem .8rem; background: #102838; border: 3px solid var(--sensor-color); box-shadow: 6px 6px 0 #071724; }
+      .node .kind-badge { width: 2.8rem; height: 2.8rem; }
+      .node .kind-badge svg { width: 1.8rem; height: 1.8rem; }
+      .node strong { display: block; font-size: 1.6rem; font-weight: 400; line-height: 1; color: #f4f9fa; }
+      .node small { font-size: 1.15rem; color: #8fb3bf; }
+      .wire { position: relative; align-self: stretch; min-height: 12rem; }
+      .wire::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; background: repeating-linear-gradient(90deg, #3f8ea3 0 8px, transparent 8px 14px); }
+      .packet { position: absolute; top: 50%; left: 0; width: 10px; height: 10px; margin-top: -5px; background: #a9eaf7; box-shadow: 0 0 0 2px #0b1722; animation: packet-right 2.4s steps(12, end) infinite; }
+      .packet.back { background: #ffd166; animation-name: packet-left; animation-delay: -1.2s; }
+      @keyframes packet-right { from { left: 0; } to { left: calc(100% - 10px); } }
+      @keyframes packet-left { from { left: calc(100% - 10px); } to { left: 0; } }
+      @keyframes packet-down { from { top: 0; } to { top: calc(100% - 10px); } }
+      @keyframes packet-up { from { top: calc(100% - 10px); } to { top: 0; } }
+      .core { position: relative; padding: 1.6rem 1.2rem 1.3rem; text-align: center; background: #0e2433; border: 4px solid #a9eaf7; box-shadow: 10px 10px 0 #071724; }
+      .core .core-lock { position: absolute; top: -1.6rem; right: -1.2rem; --sensor-color: #a9eaf7; }
+      .core img { width: 6rem; image-rendering: pixelated; animation: core-bob 1.2s steps(2, end) infinite alternate; }
+      @keyframes core-bob { to { transform: translateY(-6px); } }
+      .core h3 { margin: .3rem 0 .1rem; font-size: 2.6rem; font-weight: 400; line-height: 1; }
+      .core > p { margin: 0 0 .9rem; font-size: 1.25rem; letter-spacing: .12em; color: #9ce6f7; text-transform: uppercase; }
+      .core ul { display: grid; gap: .45rem; margin: 0; padding: 0; list-style: none; }
+      .core li { padding: .3rem .6rem; font-size: 1.35rem; color: #d8f9ff; text-align: left; background: #0b1f2b; border: 2px solid #3f8ea3; }
+      .core li::before { content: "▸ "; color: #a9eaf7; }
+      .connect-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin: 0; padding: 0; list-style: none; }
+      .connect-steps li { padding: 1.1rem 1.2rem; background: #102838; border: 3px solid #3f8ea3; }
+      .connect-steps .n { font-size: 1.15rem; letter-spacing: .2em; color: #9ce6f7; }
+      .connect-steps h3 { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin: .3rem 0 .5rem; font-size: 2rem; font-weight: 400; line-height: 1; }
+      .status { padding: .1rem .45rem; font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; border: 2px solid; }
+      .status.live { color: #9be07a; }
+      .status.soon { color: #ffd166; }
+      .connect-steps p { margin: 0; font-size: 1.4rem; line-height: 1.15; color: #bdd5dc; }
+      .fine-print { margin: 1.4rem 0 0; font-size: 1.15rem; line-height: 1.2; color: #7b9daa; }
       .ent-points { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin: 2rem 0 0; padding: 0; list-style: none; }
       .ent-points li { padding-left: 1rem; border-left: 3px solid #3f8ea3; font-size: 1.4rem; line-height: 1.15; color: #bdd5dc; }
       .ent-points strong { display: block; font-weight: 400; font-size: 1.6rem; color: #f4f9fa; }
@@ -111,6 +145,18 @@
         .nav-links .nav-cta { margin-top: .5rem; text-align: center; }
         .business { grid-template-columns: 1fr; }
         .ent-points { grid-template-columns: 1fr; }
+        .connect-steps { grid-template-columns: 1fr; }
+        .flow { grid-template-columns: 1fr; }
+        .flow-col { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; }
+        .flow-label { grid-column: 1 / -1; text-align: center; }
+        .node { flex-direction: column; gap: .4rem; padding: .7rem .4rem; text-align: center; }
+        .node small { display: none; }
+        .node strong { font-size: 1.35rem; }
+        .wire { min-height: 4.5rem; }
+        .wire::before { left: 50%; right: auto; top: 0; bottom: 0; width: 4px; height: auto; margin: 0 0 0 -2px; background: repeating-linear-gradient(180deg, #3f8ea3 0 8px, transparent 8px 14px); }
+        .packet { left: 50%; top: 0; margin: 0 0 0 -5px; animation-name: packet-down; }
+        .packet.back { left: 50%; animation-name: packet-up; }
+        .core .core-lock { right: .6rem; }
       }
       .stage { position: relative; display: grid; place-items: center; min-height: 480px; isolation: isolate; }
       .pixel-halo { position: absolute; z-index: -1; width: min(100%, 490px); height: auto; image-rendering: pixelated; }
@@ -139,6 +185,8 @@
       @media (prefers-reduced-motion: reduce) {
         .mascot-runner, .tentacle-left, .tentacle-right, .spark { animation: none; }
         html { scroll-behavior: auto; }
+        .packet { display: none; }
+        .core img { animation: none; }
       }
     </style>
   </head>
@@ -154,6 +202,7 @@
         <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">Menu</button>
         <ul class="nav-links" id="nav-links">
           <li><a href="#demo">Demo</a></li>
+          <li><a href="#connect">How it works</a></li>
           <li><a href="#use-cases">Use cases</a></li>
           <li><a href="#enterprise">Enterprise</a></li>
           <li><a href="/app.html#sign-in">Sign in</a></li>
@@ -218,6 +267,40 @@
             Your browser cannot play this video. <a href="/fizz-demo.mp4">Download the demo</a>.
           </video>
         </div>
+      </section>
+      <section class="section connect" id="connect" aria-labelledby="connect-title">
+        <p class="eyebrow">How it connects</p>
+        <h2 id="connect-title">The secure layer between agents and hardware.</h2>
+        <p class="lede">Raspberry Pis and ESP32s pair with Fizz once and post readings to a webhook with their own key. Agents like Hermes and Muse will ask Fizz, never your devices directly.</p>
+        <div class="flow" role="img" aria-label="Diagram: AI agents such as Hermes and Muse connect to Fizz, which handles pairing and authorization, and Fizz connects to devices such as Raspberry Pi and ESP32 boards.">
+          <div class="flow-col" aria-hidden="true">
+            <p class="flow-label">AI agents</p>
+            <div class="node" style="--sensor-color:#ffd166"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M14 1h2v1h-2zM12 2h4v1h-4zM11 3h5v1h-5zM10 4h5v1h-5zM9 5h5v1h-5zM9 6h4v1h-4zM3 5h6v1h-6zM2 6h7v1h-7zM1 7h12v4h-12zM0 11h14v2h-14z"/><path class="icon-cutout" d="M14 2h1v1h-1zM13 3h1v1h-1zM12 4h1v1h-1zM11 5h1v1h-1zM1 9h10v1h-10z"/></svg></span><span><strong>Hermes</strong><small>Nous Research</small></span></div>
+            <div class="node" style="--sensor-color:#ff9ed2"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 1h2v1h-2zM2 2h2v2h-2zM3 4h2v7h-2zM13 1h2v1h-2zM12 2h2v2h-2zM11 4h2v7h-2zM3 4h10v1h-10zM3 11h10v2h-10zM4 13h8v1h-8zM6 5h1v6h-1zM9 5h1v6h-1z"/><path class="icon-cutout" d="M6 12h4v1h-4z"/></svg></span><span><strong>Muse</strong><small>Meta</small></span></div>
+            <div class="node" style="--sensor-color:#c79bff"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M7 0h2v1h-2zM7 1h2v2h-2zM2 3h12v9h-12zM0 6h2v3h-2zM14 6h2v3h-2zM5 12h6v1h-6zM3 13h10v2h-10z"/><path class="icon-cutout" d="M4 6h3v2h-3zM9 6h3v2h-3zM5 9h6v1h-6z"/></svg></span><span><strong>Your agent</strong><small>Any LLM</small></span></div>
+          </div>
+          <div class="wire" aria-hidden="true"><span class="packet"></span><span class="packet back"></span></div>
+          <div class="core" aria-hidden="true">
+            <span class="kind-badge core-lock"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M5 1h6v2h-6zM4 2h2v5h-2zM10 2h2v5h-2zM2 7h12v8h-12z"/><path class="icon-cutout" d="M7 9h2v4h-2zM6 9h4v2h-4z"/></svg></span>
+            <img src="/fizz-agent.svg" alt="">
+            <h3>Fizz</h3>
+            <p>Pairing + authorization</p>
+            <ul><li>Webhook pairing</li><li>A key per device</li><li>Revoke in one click</li></ul>
+          </div>
+          <div class="wire" aria-hidden="true"><span class="packet back"></span><span class="packet"></span></div>
+          <div class="flow-col" aria-hidden="true">
+            <p class="flow-label">Devices</p>
+            <div class="node" style="--sensor-color:#ff7b6b"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 2h16v12h-16z"/><path class="icon-cutout" d="M1 3h1v1h-1zM3 3h1v1h-1zM5 3h1v1h-1zM7 3h1v1h-1zM9 3h1v1h-1zM11 3h1v1h-1zM4 7h5v5h-5zM14 6h2v2h-2zM14 10h2v2h-2zM1 12h1v1h-1z"/><path d="M5 8h3v3h-3z"/></svg></span><span><strong>Raspberry Pi</strong><small>Linux boards</small></span></div>
+            <div class="node" style="--sensor-color:#5ee6c4"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M3 0h10v16h-10z"/><path class="icon-cutout" d="M4 1h1v3h-1zM4 1h3v1h-3zM6 1h1v3h-1zM6 3h3v1h-3zM8 1h1v3h-1zM8 1h3v1h-3zM10 1h1v3h-1zM5 6h6v5h-6zM3 6h1v1h-1zM3 8h1v1h-1zM3 10h1v1h-1zM3 12h1v1h-1zM12 6h1v1h-1zM12 8h1v1h-1zM12 10h1v1h-1zM12 12h1v1h-1zM6 14h4v2h-4z"/><path d="M6 7h4v3h-4z"/></svg></span><span><strong>ESP32</strong><small>Wi-Fi microcontrollers</small></span></div>
+            <div class="node" style="--sensor-color:#5cc8ff"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M3 3h10v10h-10zM4 1h1v2h-1zM7 1h2v2h-2zM11 1h1v2h-1zM4 13h1v2h-1zM7 13h2v2h-2zM11 13h1v2h-1zM1 4h2v1h-2zM1 7h2v2h-2zM1 11h2v1h-2zM13 4h2v1h-2zM13 7h2v2h-2zM13 11h2v1h-2z"/><path class="icon-cutout" d="M5 5h6v6h-6z"/><path d="M6 6h4v4h-4z"/></svg></span><span><strong>Any device</strong><small>Anything with HTTPS</small></span></div>
+          </div>
+        </div>
+        <ol class="connect-steps">
+          <li><span class="n">01</span><h3>Pair <span class="status live">Live</span></h3><p>Add a sensor in API mode. Fizz shows its key once, and your Pi or ESP32 posts readings to the Fizz webhook with it.</p></li>
+          <li><span class="n">02</span><h3>Authorize <span class="status live">Live</span></h3><p>Every request is checked against that device's key. Rotate or revoke one device without touching the rest.</p></li>
+          <li><span class="n">03</span><h3>Connect agents <span class="status soon">Coming soon</span></h3><p>Hermes, Muse, and other agents get scoped access through Fizz. They never see your device keys.</p></li>
+        </ol>
+        <p class="fine-print">Hermes Agent is an open-source project by Nous Research. Muse is a product of Meta. Fizz is not affiliated with either, and agent connections are still in development.</p>
       </section>
       <section class="section uses" id="use-cases" aria-labelledby="uses-title">
         <p class="eyebrow">Use cases</p>
