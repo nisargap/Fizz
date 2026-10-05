@@ -5,6 +5,7 @@ edition = "2024"
 description = "The physical layer for AI agents"
 
 [dependencies]
+base64 = "0.22"
 http-body-util = "0.1"
 reqwest = { version = "0.12", default-features = false, features = ["json", "multipart", "rustls-tls"] }
 serde_json = "1"
@@ -62,3 +63,15 @@ path = "api/voice.rs"
 [[bin]]
 name = "waitlist"
 path = "api/waitlist.rs"
+
+[[bin]]
+name = "mcp"
+path = "api/mcp.rs"
+
+[[bin]]
+name = "agents"
+path = "api/agents.rs"
+
+[[bin]]
+name = "devices"
+path = "api/devices.rs"

@@ -1,5 +1,8 @@
 pub mod agent;
+pub mod agents;
 pub mod customer;
+pub mod devices;
+pub mod mcp;
 pub mod notify;
 pub mod phone;
 pub mod sensors;

@@ -1,0 +1,22 @@
+[package]
+name = "fizz-cli"
+version = "0.1.0"
+edition = "2024"
+description = "Pair a device with Fizz and stream its readings"
+license = "MIT"
+
+[[bin]]
+name = "fizz"
+path = "src/main.rs"
+
+[dependencies]
+libc = "0.2"
+serde_json = "1"
+ureq = { version = "3", default-features = false, features = ["rustls", "json"] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

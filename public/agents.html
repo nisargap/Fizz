@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b1722">
+<title>Agents · Fizz</title>
+<link rel="icon" href="/fizz-agent.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/sky.css"><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/dashboard.css"><link rel="stylesheet" href="/sensors.css"><link rel="stylesheet" href="/agents.css">
+<script src="/agents.js" defer></script>
+</head>
+<body><div class="pixel-sky" aria-hidden="true"><span class="shooting-star shooting-star-one"></span><span class="shooting-star shooting-star-two"></span><span class="shooting-star shooting-star-three"></span></div>
+<main class="shell dashboard-active"><section class="dashboard" aria-labelledby="agents-title">
+  <header class="dashboard-bar"><a class="dashboard-logo" href="/">Fizz<span>.</span></a><nav aria-label="Workspace"><a href="/app.html">Overview</a><a href="/sensors.html">Sensors</a><a class="active" href="/agents.html">Agents</a></nav><div class="dashboard-account"><span id="agents-username"></span><button type="button" id="agents-sign-out">Sign out</button></div></header>
+  <div class="sensors-heading"><div><p class="setup-eyebrow">AGENTS + DEVICES</p><h1 id="agents-title">Agents</h1><p>Let AI agents read your sensors, and pair new devices.</p></div><img src="/fizz-agent.svg" alt="" aria-hidden="true"></div>
+
+  <section class="dash-panel agent-connect" aria-labelledby="connect-title">
+    <div class="section-heading"><div><p class="setup-eyebrow">01 / CONNECT AN AGENT</p><h2 id="connect-title">Give an agent access</h2></div></div>
+    <p class="agent-intro">Hermes, Claude Code, and other MCP clients connect to Fizz with their own token. Agents can read sensors and readings, and claim device pairing codes. They never see device keys or your phone number.</p>
+    <form id="agent-form" class="agent-form">
+      <label for="agent-name">Agent name<input id="agent-name" maxlength="60" required placeholder="e.g. Hermes on my server" autocomplete="off"></label>
+      <label class="agent-check"><input type="checkbox" id="agent-alerts"> Let this agent create dashboard alerts</label>
+      <button class="primary" type="submit">Create agent token</button>
+    </form>
+    <p class="form-message" id="agent-message" role="status"></p>
+    <div id="agent-secret" hidden></div>
+    <p class="agent-endpoint">MCP endpoint <code id="mcp-url"></code></p>
+  </section>
+
+  <section class="dash-panel" aria-labelledby="agents-list-title">
+    <div class="section-heading"><div><p class="setup-eyebrow">02 / CONNECTED</p><h2 id="agents-list-title">Your agents</h2></div><span id="agent-count" class="agent-count"></span></div>
+    <ul id="agent-list" class="agent-list"></ul>
+    <p id="agent-empty" class="dashboard-empty" hidden>No agents connected yet.</p>
+  </section>
+
+  <section class="dash-panel" aria-labelledby="pair-title">
+    <div class="section-heading"><div><p class="setup-eyebrow">03 / PAIR A DEVICE</p><h2 id="pair-title">Add a Raspberry Pi or Linux board</h2></div></div>
+    <ol class="pair-steps">
+      <li><span>On the device, install the Fizz CLI:</span><pre><code id="install-cmd"></code></pre></li>
+      <li><span>Run <code>fizz pair</code>. It shows a code like <code>7K3P-Q9DM</code>.</span></li>
+      <li><span>Tell your agent "pair my device with code …", or enter the code here. Then approve on the device.</span></li>
+    </ol>
+    <form id="pair-form" class="agent-form pair-form">
+      <label for="pair-code">Pairing code<input id="pair-code" maxlength="24" required placeholder="7K3P-Q9DM" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+      <label for="pair-name">Device name <span class="optional">(optional)</span><input id="pair-name" maxlength="80" placeholder="e.g. Garage Pi" autocomplete="off"></label>
+      <button class="primary" type="submit">Claim code</button>
+    </form>
+    <p class="form-message" id="pair-message" role="status"></p>
+  </section>
+  <p class="form-message" id="page-error" role="alert"></p>
+</section></main></body></html>

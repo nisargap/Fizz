@@ -113,6 +113,7 @@
       .status.live { color: #9be07a; }
       .status.soon { color: #ffd166; }
       .connect-steps p { margin: 0; font-size: 1.4rem; line-height: 1.15; color: #bdd5dc; }
+      .connect-steps code { font-family: monospace; font-size: .85rem; color: #a9eaf7; overflow-wrap: anywhere; }
       .fine-print { margin: 1.4rem 0 0; font-size: 1.15rem; line-height: 1.2; color: #7b9daa; }
       .ent-points { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin: 2rem 0 0; padding: 0; list-style: none; }
       .ent-points li { padding-left: 1rem; border-left: 3px solid #3f8ea3; font-size: 1.4rem; line-height: 1.15; color: #bdd5dc; }
@@ -271,7 +272,7 @@
       <section class="section connect" id="connect" aria-labelledby="connect-title">
         <p class="eyebrow">How it connects</p>
         <h2 id="connect-title">The secure layer between agents and hardware.</h2>
-        <p class="lede">Raspberry Pis and ESP32s pair with Fizz once and post readings to a webhook with their own key. Agents like Hermes and Muse will ask Fizz, never your devices directly.</p>
+        <p class="lede">A Raspberry Pi pairs with one command and a short code you approve on the device. Agents like Hermes connect over MCP and ask Fizz, never your devices directly.</p>
         <div class="flow" role="img" aria-label="Diagram: AI agents such as Hermes and Muse connect to Fizz, which handles pairing and authorization, and Fizz connects to devices such as Raspberry Pi and ESP32 boards.">
           <div class="flow-col" aria-hidden="true">
             <p class="flow-label">AI agents</p>
@@ -285,7 +286,7 @@
             <img src="/fizz-agent.svg" alt="">
             <h3>Fizz</h3>
             <p>Pairing + authorization</p>
-            <ul><li>Webhook pairing</li><li>A key per device</li><li>Revoke in one click</li></ul>
+            <ul><li>Pair with a code</li><li>Approve on the device</li><li>Revoke in one click</li></ul>
           </div>
           <div class="wire" aria-hidden="true"><span class="packet back"></span><span class="packet"></span></div>
           <div class="flow-col" aria-hidden="true">
@@ -296,11 +297,11 @@
           </div>
         </div>
         <ol class="connect-steps">
-          <li><span class="n">01</span><h3>Pair <span class="status live">Live</span></h3><p>Add a sensor in API mode. Fizz shows its key once, and your Pi or ESP32 posts readings to the Fizz webhook with it.</p></li>
+          <li><span class="n">01</span><h3>Pair <span class="status live">Live</span></h3><p>On a Pi, run <code>curl -fsSL https://fizz-zeta.vercel.app/install.sh | sh</code>, then <code>fizz pair</code>, and approve the request there. ESP32s post to the same webhook with a sensor key.</p></li>
           <li><span class="n">02</span><h3>Authorize <span class="status live">Live</span></h3><p>Every request is checked against that device's key. Rotate or revoke one device without touching the rest.</p></li>
-          <li><span class="n">03</span><h3>Connect agents <span class="status soon">Coming soon</span></h3><p>Hermes, Muse, and other agents get scoped access through Fizz. They never see your device keys.</p></li>
+          <li><span class="n">03</span><h3>Connect agents <span class="status live">Live</span></h3><p>Hermes, Claude Code, and other MCP clients connect with their own revocable token. They read sensors and pair devices, and never see device keys.</p></li>
         </ol>
-        <p class="fine-print">Hermes Agent is an open-source project by Nous Research. Muse is a product of Meta. Fizz is not affiliated with either, and agent connections are still in development.</p>
+        <p class="fine-print">Hermes Agent is an open-source project by Nous Research. Muse is a product of Meta. Fizz is not affiliated with either. Agents connect through Fizz's MCP server with a bearer token; Muse support depends on the connector options Meta offers.</p>
       </section>
       <section class="section uses" id="use-cases" aria-labelledby="uses-title">
         <p class="eyebrow">Use cases</p>

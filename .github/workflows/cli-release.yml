@@ -1,0 +1,79 @@
+# Build the Fizz CLI for Raspberry Pi and Linux and publish it as a GitHub Release.
+# Push a tag matching cli/Cargo.toml's version, e.g.:  git tag cli-v0.1.0 && git push origin cli-v0.1.0
+# install.sh downloads fizz-<target> and verifies it against SHA256SUMS from the latest release.
+name: CLI release
+
+on:
+  push:
+    tags: ["cli-v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to rebuild, e.g. cli-v0.1.0
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        target:
+          - aarch64-unknown-linux-musl      # Pi 3/4/5, Zero 2 W (64-bit OS)
+          - armv7-unknown-linux-musleabihf  # Pi 2/3/4 (32-bit OS)
+          - arm-unknown-linux-musleabihf    # Pi Zero, Zero W, Pi 1
+          - x86_64-unknown-linux-musl       # Linux PCs and servers
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - name: Check the tag matches the CLI version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' cli/Cargo.toml | head -1)
+          [ "cli-v$version" = "$TAG" ] || { echo "Tag $TAG does not match cli/Cargo.toml version $version"; exit 1; }
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Install cargo-zigbuild
+        run: pip install cargo-zigbuild
+      - name: Test
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: cargo test --locked --manifest-path cli/Cargo.toml
+      - name: Build
+        run: cargo zigbuild --release --locked --manifest-path cli/Cargo.toml --target ${{ matrix.target }}
+      - run: cp cli/target/${{ matrix.target }}/release/fizz fizz-${{ matrix.target }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fizz-${{ matrix.target }}
+          path: fizz-${{ matrix.target }}
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        run: cd dist && sha256sum fizz-* > SHA256SUMS && cat SHA256SUMS
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes="Install on a Raspberry Pi or Linux device:
+
+            curl -fsSL https://fizz-zeta.vercel.app/install.sh | sh
+            fizz pair"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --title "Fizz CLI ${TAG#cli-}" --notes "$notes"
+          fi

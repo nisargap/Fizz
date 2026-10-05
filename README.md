@@ -12,6 +12,9 @@ The hackathon product scope, architecture, demo flow, and parallel work assignme
 - `public/app.html` — account onboarding and live sensor dashboard
 - `public/sensors.html` — add, configure, and remove sensors
 - `public/phone.html` — phone pairing and browser sensor sharing
+- `public/agents.html` — agent tokens and device pairing
+- `public/install.sh` — installer for the Fizz CLI
+- `cli/` — the `fizz` device CLI (Rust)
 - `supabase/migrations/` — customer and session schema
 - `Cargo.toml` — Rust package and function binary
 
@@ -105,6 +108,62 @@ The dashboard's **Talk to Fizz** button records one spoken turn (up to 30 second
 | `ELEVENLABS_VOICE_ID` | Optional voice ID; defaults to George (`JBFqnCBsd6RMkjVDRZzb`) |
 
 Speech uses ElevenLabs `scribe_v2` transcription and `eleven_multilingual_v2` synthesis. This is voice chat inside Fizz; outbound threshold-alert calls continue to use AgentPhone. Typed chat stays available when speech or microphone access is unavailable.
+
+## Agent connections (MCP)
+
+AI agents reach a customer's data through Fizz's MCP server at `POST /api/mcp`. On the **Agents** page (`/agents.html`), the customer creates a token for each agent. The token looks like `fizz_agent_…`, is shown once, and is stored only as a hash. Each token is read-only unless the customer allows it to create dashboard alerts, and it can be revoked at any time. Agents never receive device keys, phone numbers, or the session cookie.
+
+The server is stateless and speaks both MCP eras on the same endpoint. Clients on 2026-07-28 send the protocol version in `_meta` along with the `MCP-Protocol-Version`, `Mcp-Method`, and `Mcp-Name` headers. The server validates these headers and implements `server/discover`. Older clients (2025-03-26 through 2025-11-25) open with `initialize`. Every request needs `Authorization: Bearer <token>`. Tool calls are limited to 120 per minute per token. A request carrying a foreign `Origin` header is rejected.
+
+| Tool | What it does |
+| --- | --- |
+| `list_sensors` | Sensors and paired devices with their latest reading |
+| `get_readings` | Recent readings for one sensor, optionally one metric (up to 100) |
+| `list_alerts` | Alert rules and the 20 most recent triggers |
+| `create_alert` | Dashboard-only threshold alert; repeats return the existing rule (only for tokens allowed to create alerts) |
+| `pair_device` | Claim a pairing code shown by `fizz pair` |
+
+Hermes Agent (`config.yaml`):
+
+```yaml
+mcp_servers:
+  fizz:
+    url: "https://fizz-zeta.vercel.app/api/mcp"
+    headers:
+      Authorization: "Bearer fizz_agent_..."
+```
+
+Claude Code: `claude mcp add --transport http fizz https://fizz-zeta.vercel.app/api/mcp --header "Authorization: Bearer fizz_agent_..."`
+
+## Device pairing and the Fizz CLI
+
+The `fizz` CLI (`cli/`) is a small static Rust binary for Raspberry Pi and other Linux devices. On the device:
+
+```sh
+curl -fsSL https://fizz-zeta.vercel.app/install.sh | sh
+fizz pair
+```
+
+`fizz pair` shows a code such as `7K3P-Q9DM`. An agent claims it with `pair_device`, or the customer enters it on the Agents page. The CLI then asks the person at the device to approve the request, showing which account (and which agent) asked. After approval, Fizz creates an API-mode Custom sensor for the device and returns its key once. The CLI saves the key to `~/.config/fizz/device.json` with mode 600. Codes carry 40 random bits, expire after 15 minutes, are single use, and are rate-limited: 10 new codes per IP and 20 claims per account per hour. Rejected or expired codes connect nothing.
+
+| Command | Purpose |
+| --- | --- |
+| `fizz run [--every 60] [--once]` | Send `cpu_temperature_c`, `load_1m`, `memory_used_pct`, and `disk_used_pct` |
+| `fizz send METRIC VALUE …` | Send your own readings (numbers, `true`/`false`, or short text) |
+| `fizz status` / `fizz unpair` | Show the pairing, or revoke this device's key and forget it |
+| `fizz service` | Print a systemd unit that keeps `fizz run` going after reboot |
+
+Readings go through the same `/api/ingest` path as any API sensor, so alerts, the dashboard, and chat work unchanged. Microcontrollers such as ESP32 can't run the CLI; create an API sensor on the Sensors page and post to `/api/ingest` with its key.
+
+The installer detects the CPU (`aarch64`, `armv7`, `armv6`, or `x86_64`) and downloads the matching binary from this repository's latest GitHub Release. It verifies the binary against the release's `SHA256SUMS`, then installs it to `/usr/local/bin` or `~/.local/bin`. Set `FIZZ_VERSION` to pin a release, or `FIZZ_INSTALL_DIR` to choose the directory.
+
+To release the CLI, bump `version` in `cli/Cargo.toml`, then push a matching tag:
+
+```sh
+git tag cli-v0.1.0 && git push origin cli-v0.1.0
+```
+
+The `CLI release` workflow tests the CLI and cross-compiles it with `cargo-zigbuild` for the four targets. It then publishes `fizz-<target>` binaries and `SHA256SUMS` as a GitHub Release. Releases must stay publicly downloadable for the installer to work, so if this repository becomes private, publish the binaries from a public repository instead and update `REPO` in `public/install.sh`.
 
 ## Supabase Compute
 

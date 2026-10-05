@@ -20,7 +20,7 @@ const KINDS: [&str; 9] = [
     "custom",
 ];
 
-fn valid_uuid(value: &str) -> bool {
+pub fn valid_uuid(value: &str) -> bool {
     value.len() == 36
         && value.bytes().enumerate().all(|(i, c)| {
             if matches!(i, 8 | 13 | 18 | 23) {
