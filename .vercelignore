@@ -4,3 +4,4 @@ target/**
 !target/aarch64-unknown-linux-gnu/release/**
 cli/
 .github/
+hardware/
