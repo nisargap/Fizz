@@ -1,6 +1,6 @@
 [package]
 name = "fizz-cli"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Pair a device with Fizz and stream its readings"
 license = "MIT"
