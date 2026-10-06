@@ -56,6 +56,13 @@
       .waitlist-status.error { color: #ffb9af; }
       .invite { margin: 1rem 0 0; font-size: 1.35rem; color: #bdd5dc; }
       .invite a { color: #a9eaf7; }
+      .award-card { --sensor-color: #3ecf8e; display: flex; align-items: center; gap: .8rem; width: fit-content; max-width: 100%; margin-top: 1.4rem; padding: .6rem .9rem .6rem .7rem; color: #f4f9fa; text-decoration: none; background: #102838; border: 3px solid var(--sensor-color); box-shadow: 6px 6px 0 #071724; }
+      .award-card:hover { background: #12333f; }
+      .award-card .kind-badge { width: 2.8rem; height: 2.8rem; }
+      .award-card .kind-badge svg { width: 1.8rem; height: 1.8rem; }
+      .award-card small { display: block; font-size: 1.1rem; letter-spacing: .15em; color: var(--sensor-color); text-transform: uppercase; }
+      .award-card strong { display: block; font-size: 1.5rem; font-weight: 400; line-height: 1; }
+      .award-card .arrow { color: var(--sensor-color); font-size: 1.4rem; }
       .scroll-cue { display: inline-block; margin-top: 1.6rem; font-size: 1.45rem; color: #a9eaf7; text-decoration: none; }
       .scroll-cue:hover { color: #d1f7ff; }
       a:focus-visible, button:focus-visible, input:focus-visible, video:focus-visible { outline: 3px solid white; outline-offset: 4px; }
@@ -182,6 +189,7 @@
         .copy { grid-row: 2; }
         .tagline { margin: 1.2rem auto 2rem; }
         .waitlist { margin: 0 auto; flex-direction: column; }
+        .award-card { margin-left: auto; margin-right: auto; text-align: left; }
       }
       @media (prefers-reduced-motion: reduce) {
         .mascot-runner, .tentacle-left, .tentacle-right, .spark { animation: none; }
@@ -225,6 +233,11 @@
           </form>
           <p class="waitlist-status" id="waitlist-status" role="status" aria-live="polite"></p>
           <p class="invite">Have an invite? <a href="/app.html">Create your account</a> · <a href="/app.html#sign-in">Sign in</a></p>
+          <a class="award-card" href="https://hackathon.supabase.com/supabase-select-2026-hackathon/teams/7c144db2-dee5-42a7-9aaa-5348143c3a06" target="_blank" rel="noopener">
+            <span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M9 0h2v1h-2zM8 1h3v1h-3zM7 2h4v1h-4zM6 3h5v1h-5zM5 4h6v1h-6zM4 5h7v1h-7zM3 6h8v1h-8zM2 7h9v1h-9z"/><path fill="#249361" d="M5 8h9v1h-9zM5 9h8v1h-8zM5 10h7v1h-7zM5 11h6v1h-6zM5 12h5v1h-5zM5 13h4v1h-4zM5 14h3v1h-3zM5 15h2v1h-2z"/></svg></span>
+            <span><small>Winner</small><strong>Supabase Select 2026 Hackathon</strong></span>
+            <span class="arrow" aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span>
+          </a>
           <a class="scroll-cue" href="#demo">Watch the 2-minute demo ↓</a>
         </div>
         <div class="stage">
