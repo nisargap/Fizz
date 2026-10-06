@@ -79,7 +79,7 @@ The Sensors page can create additional sensors, switch a sensor to API mode, rot
 For API ingestion, use a unique `event_id` for each sample; retries with the same ID are idempotent. Metrics are validated against the sensor type. For example, a Temperature sensor accepts `temperature_c`:
 
 ```sh
-curl -X POST https://fizz-zeta.vercel.app/api/ingest \
+curl -X POST https://fizzlayer.com/api/ingest \
   -H 'Authorization: Bearer YOUR_SENSOR_API_KEY' \
   -H 'Content-Type: application/json' \
   -d '{"sensor_id":"YOUR_SENSOR_ID","event_id":"sample-001","metrics":{"temperature_c":27.4}}'
@@ -128,19 +128,19 @@ Hermes Agent (`config.yaml`):
 ```yaml
 mcp_servers:
   fizz:
-    url: "https://fizz-zeta.vercel.app/api/mcp"
+    url: "https://fizzlayer.com/api/mcp"
     headers:
       Authorization: "Bearer fizz_agent_..."
 ```
 
-Claude Code: `claude mcp add --transport http fizz https://fizz-zeta.vercel.app/api/mcp --header "Authorization: Bearer fizz_agent_..."`
+Claude Code: `claude mcp add --transport http fizz https://fizzlayer.com/api/mcp --header "Authorization: Bearer fizz_agent_..."`
 
 ## Device pairing and the Fizz CLI
 
 The `fizz` CLI (`cli/`) is a small static Rust binary for Raspberry Pi and other Linux devices. On the device:
 
 ```sh
-curl -fsSL https://fizz-zeta.vercel.app/install.sh | sh
+curl -fsSL https://fizzlayer.com/install.sh | sh
 fizz pair
 ```
 

@@ -15,7 +15,7 @@ use std::{
 
 use serde_json::{Map, Value, json};
 
-const DEFAULT_API: &str = "https://fizz-zeta.vercel.app";
+const DEFAULT_API: &str = "https://fizzlayer.com";
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const HELP: &str = "fizz — connect this device to Fizz
 
@@ -29,7 +29,7 @@ Usage:
   fizz --version
 
 Environment:
-  FIZZ_API      Fizz base URL (default https://fizz-zeta.vercel.app)
+  FIZZ_API      Fizz base URL (default https://fizzlayer.com)
   FIZZ_CONFIG   Config file (default ~/.config/fizz/device.json)";
 
 type Result<T> = std::result::Result<T, String>;

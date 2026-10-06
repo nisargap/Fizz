@@ -1,9 +1,9 @@
 #!/bin/sh
-# Fizz CLI installer — https://fizz-zeta.vercel.app/install.sh
+# Fizz CLI installer — https://fizzlayer.com/install.sh
 #
 # Downloads the `fizz` binary for this device from GitHub Releases
 # (https://github.com/nisargap/Fizz/releases), checks its SHA-256 checksum, and installs it.
-# Read it first if you like:  curl -fsSL https://fizz-zeta.vercel.app/install.sh | less
+# Read it first if you like:  curl -fsSL https://fizzlayer.com/install.sh | less
 #
 # Options (environment variables):
 #   FIZZ_VERSION=cli-v0.1.0   install a specific release instead of the latest

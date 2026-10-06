@@ -70,7 +70,7 @@ jobs:
         run: |
           notes="Install on a Raspberry Pi or Linux device:
 
-            curl -fsSL https://fizz-zeta.vercel.app/install.sh | sh
+            curl -fsSL https://fizzlayer.com/install.sh | sh
             fizz pair"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
