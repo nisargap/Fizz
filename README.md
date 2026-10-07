@@ -1,6 +1,6 @@
-# Fizz
+# Fizzlayer
 
-Fizz is the physical layer for AI agents. This repository contains a Rust/Vercel API, Supabase data model, and a small static app for sensor streams, phone pairing, chat, and alerts.
+Fizzlayer is the physical layer for AI agents, with Fizz as its agent and mascot. This repository contains a Rust/Vercel API, Supabase data model, and a small static app for sensor streams, phone pairing, chat, and alerts.
 
 The hackathon product scope, architecture, demo flow, and parallel work assignments are in [the product plan](docs/PRODUCT_PLAN.md).
 

@@ -4,17 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0b1722">
-    <title>Fizz — The physical layer for AI agents</title>
-    <meta name="description" content="Meet Fizz, the physical layer for AI agents. Connect any sensor, ask about it in plain English, and get a call when something goes wrong. Join the waitlist.">
+    <title>Fizzlayer — The physical layer for AI agents</title>
+    <meta name="description" content="Fizzlayer is the physical layer for AI agents. Connect any sensor, ask about it in plain English, and get a call when something goes wrong. Join the waitlist.">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Fizz">
+    <meta property="og:site_name" content="Fizzlayer">
     <meta property="og:url" content="https://fizzlayer.com/">
-    <meta property="og:title" content="Fizz — The physical layer for AI agents">
+    <meta property="og:title" content="Fizzlayer — The physical layer for AI agents">
     <meta property="og:description" content="Connect any sensor, ask about it in plain English, and get a call when something goes wrong. Join the waitlist.">
     <meta property="og:image" content="https://fizzlayer.com/og.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Fizz, a pixel-art mascot, beside the tagline “The physical layer for AI agents” and nine sensor icons.">
+    <meta property="og:image:alt" content="Fizz, the Fizzlayer pixel-art mascot, beside the Fizzlayer name, the tagline “The physical layer for AI agents” and nine sensor icons.">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="/fizz-agent.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,7 +43,7 @@
       .hero { width: min(1100px, calc(100% - 3rem)); min-height: calc(100vh - 4.5rem); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(2rem, 5vw, 5rem); }
       .copy { position: relative; z-index: 1; }
       .eyebrow { margin: 0 0 1rem; color: #9ce6f7; font-size: 1.25rem; letter-spacing: .15em; text-transform: uppercase; }
-      h1 { margin: 0; font-size: clamp(7rem, 16vw, 12rem); line-height: .8; }
+      h1 { margin: 0; font-size: clamp(4rem, 8.5vw, 6.75rem); line-height: .8; }
       .tagline { max-width: 28rem; margin: 2rem 0 2.5rem; font-size: clamp(2rem, 3.3vw, 2.7rem); line-height: 1.05; color: #bdd5dc; }
       .waitlist-intro { margin: 0 0 .8rem; font-size: 1.45rem; color: #9ce6f7; }
       .waitlist { display: flex; gap: .6rem; max-width: 30rem; }
@@ -210,7 +210,7 @@
     </div>
     <header class="site-nav">
       <nav aria-label="Main">
-        <a class="nav-logo" href="#top" aria-label="Fizz, back to top">Fizz<span>.</span></a>
+        <a class="nav-logo" href="#top" aria-label="Fizzlayer, back to top">Fizzlayer<span>.</span></a>
         <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">Menu</button>
         <ul class="nav-links" id="nav-links">
           <li><a href="#demo">Demo</a></li>
@@ -225,10 +225,10 @@
     <main>
       <section class="hero" id="top">
         <div class="copy" id="join">
-          <p class="eyebrow">Meet your new sidekick</p>
-          <h1>Fizz.</h1>
+          <p class="eyebrow">Meet Fizz, your new sidekick</p>
+          <h1>Fizzlayer.</h1>
           <p class="tagline">The physical layer for AI agents.</p>
-          <p class="waitlist-intro">Fizz is invite-only for now. Join the waitlist.</p>
+          <p class="waitlist-intro">Fizzlayer is invite-only for now. Join the waitlist.</p>
           <form class="waitlist" id="waitlist" novalidate>
             <label class="visually-hidden" for="waitlist-email">Email address</label>
             <input id="waitlist-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com">
@@ -275,7 +275,7 @@
       </section>
       <section class="section demo" id="demo" aria-labelledby="demo-title">
         <p class="eyebrow">See it in action</p>
-        <h2 id="demo-title">Fizz in two minutes.</h2>
+        <h2 id="demo-title">Fizzlayer in two minutes.</h2>
         <p class="lede">A walkthrough of the live app: pick sensors, watch readings stream in, ask Fizz what it sees, and get called when a reading crosses the line.</p>
         <div class="video-frame">
           <video controls preload="metadata" playsinline poster="/fizz-demo-poster.jpg" width="1920" height="1080">
@@ -288,8 +288,8 @@
       <section class="section connect" id="connect" aria-labelledby="connect-title">
         <p class="eyebrow">How it connects</p>
         <h2 id="connect-title">The secure layer between agents and hardware.</h2>
-        <p class="lede">A Raspberry Pi pairs with one command and a short code you approve on the device. Agents like Hermes connect over MCP and ask Fizz, never your devices directly.</p>
-        <div class="flow" role="img" aria-label="Diagram: AI agents such as Hermes and Muse connect to Fizz, which handles pairing and authorization, and Fizz connects to devices such as Raspberry Pi and ESP32 boards.">
+        <p class="lede">A Raspberry Pi pairs with one command and a short code you approve on the device. Agents like Hermes connect over MCP and ask Fizzlayer, never your devices directly.</p>
+        <div class="flow" role="img" aria-label="Diagram: AI agents such as Hermes and Muse connect to Fizzlayer, which handles pairing and authorization, and Fizzlayer connects to devices such as Raspberry Pi and ESP32 boards.">
           <div class="flow-col" aria-hidden="true">
             <p class="flow-label">AI agents</p>
             <div class="node" style="--sensor-color:#ffd166"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M14 1h2v1h-2zM12 2h4v1h-4zM11 3h5v1h-5zM10 4h5v1h-5zM9 5h5v1h-5zM9 6h4v1h-4zM3 5h6v1h-6zM2 6h7v1h-7zM1 7h12v4h-12zM0 11h14v2h-14z"/><path class="icon-cutout" d="M14 2h1v1h-1zM13 3h1v1h-1zM12 4h1v1h-1zM11 5h1v1h-1zM1 9h10v1h-10z"/></svg></span><span><strong>Hermes</strong><small>Nous Research</small></span></div>
@@ -300,7 +300,7 @@
           <div class="core" aria-hidden="true">
             <span class="kind-badge core-lock"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M5 1h6v2h-6zM4 2h2v5h-2zM10 2h2v5h-2zM2 7h12v8h-12z"/><path class="icon-cutout" d="M7 9h2v4h-2zM6 9h4v2h-4z"/></svg></span>
             <img src="/fizz-agent.svg" alt="">
-            <h3>Fizz</h3>
+            <h3>Fizzlayer</h3>
             <p>Pairing + authorization</p>
             <ul><li>Pair with a code</li><li>Approve on the device</li><li>Revoke in one click</li></ul>
           </div>
@@ -317,7 +317,7 @@
           <li><span class="n">02</span><h3>Authorize <span class="status live">Live</span></h3><p>Every request is checked against that device's key. Rotate or revoke one device without touching the rest.</p></li>
           <li><span class="n">03</span><h3>Connect agents <span class="status live">Live</span></h3><p>Hermes, Claude Code, and other MCP clients connect with their own revocable token. They read sensors and pair devices, and never see device keys.</p></li>
         </ol>
-        <p class="fine-print">Hermes Agent is an open-source project by Nous Research. Muse is a product of Meta. Fizz is not affiliated with either. Agents connect through Fizz's MCP server with a bearer token; Muse support depends on the connector options Meta offers.</p>
+        <p class="fine-print">Hermes Agent is an open-source project by Nous Research. Muse is a product of Meta. Fizzlayer is not affiliated with either. Agents connect through Fizzlayer's MCP server with a bearer token; Muse support depends on the connector options Meta offers.</p>
       </section>
       <section class="section uses" id="use-cases" aria-labelledby="uses-title">
         <p class="eyebrow">Use cases</p>
@@ -372,7 +372,7 @@
       <section class="section enterprise" id="enterprise" aria-labelledby="enterprise-title">
         <p class="eyebrow">Enterprise</p>
         <h2 id="enterprise-title">Every sensor on site. One agent watching.</h2>
-        <p class="lede">Warehouses, fleets, and factory floors already run on sensors. Fizz gives them one place to ask questions, and calls the right person when a reading crosses the line.</p>
+        <p class="lede">Warehouses, fleets, and factory floors already run on sensors. Fizzlayer gives them one place to ask questions, and calls the right person when a reading crosses the line.</p>
         <div class="use-grid">
           <article class="use-card" style="--sensor-color:#ffd166">
             <div class="use-head"><span class="kind-badge"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M7 1h2v1h-2zM5 2h6v1h-6zM3 3h10v1h-10zM1 4h14v1h-14zM0 5h16v2h-16zM1 7h14v9h-14z"/><path class="icon-cutout" d="M7 3h2v1h-2zM3 9h10v7h-10z"/><path d="M4 13h3v3h-3zM9 13h3v3h-3zM6 10h4v3h-4z"/></svg></span><span class="use-kind">Temperature · humidity · water</span></div>
@@ -403,7 +403,7 @@
         </ul>
         <div class="business" id="business">
           <div>
-            <h3>Bring Fizz to your team</h3>
+            <h3>Bring Fizzlayer to your team</h3>
             <p>Tell us about your sites and what you need to watch. We'll reach out about early access.</p>
           </div>
           <form id="business-form" novalidate>
@@ -431,7 +431,7 @@
       </section>
     </main>
     <footer class="site-footer">
-      <span>Fizz. The physical layer for AI agents.</span>
+      <span>Fizzlayer. The physical layer for AI agents.</span>
       <nav aria-label="Legal"><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></nav>
     </footer>
     <script>
@@ -479,7 +479,7 @@
           status.textContent = "You're on the list. We'll email you when your invite is ready.";
         } catch (error) {
           status.classList.add('error');
-          status.textContent = error instanceof TypeError ? 'Could not reach Fizz. Check your connection and try again.' : error.message;
+          status.textContent = error instanceof TypeError ? 'Could not reach Fizzlayer. Check your connection and try again.' : error.message;
         } finally {
           button.disabled = false;
         }
@@ -514,7 +514,7 @@
           business.reset();
         } catch (error) {
           businessStatus.classList.add('error');
-          businessStatus.textContent = error instanceof TypeError ? 'Could not reach Fizz. Check your connection and try again.' : error.message;
+          businessStatus.textContent = error instanceof TypeError ? 'Could not reach Fizzlayer. Check your connection and try again.' : error.message;
         } finally {
           button.disabled = false;
         }

@@ -21,7 +21,7 @@ async function request(action, data = {}, useDevice = false) {
     body: JSON.stringify({ action, ...data }), cache: 'no-store',
   });
   const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(result.error?.message || 'Fizz could not complete this request.');
+  if (!response.ok) throw new Error(result.error?.message || 'Fizzlayer could not complete this request.');
   return result;
 }
 
@@ -41,7 +41,7 @@ async function connect() {
     }
   }
   if (!deviceToken) {
-    message('A pairing link is needed.', 'Ask the Fizz account owner to create a Phone sensor and send you its unique link.', true);
+    message('A pairing link is needed.', 'Ask the Fizzlayer account owner to create a Phone sensor and send you its unique link.', true);
     return;
   }
   message('Phone connected', 'Choose which signals to share below.');

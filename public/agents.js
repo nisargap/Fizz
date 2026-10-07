@@ -80,7 +80,7 @@
       const revoke = node('button', 'sensor-remove', 'Revoke');
       revoke.type = 'button';
       revoke.addEventListener('click', async () => {
-        if (!confirm(`Revoke ${connection.name}? It will lose access to Fizz immediately.`)) return;
+        if (!confirm(`Revoke ${connection.name}? It will lose access to Fizzlayer immediately.`)) return;
         revoke.disabled = true;
         try { await api('/api/agents', 'DELETE', { id: connection.id }); await refresh(); }
         catch (error) { $('page-error').textContent = error.message; revoke.disabled = false; }

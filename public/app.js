@@ -32,7 +32,7 @@ function render() {
   $('step-label').textContent = creating ? `${String(step).padStart(2, '0')} / 02` : 'SIGN IN';
   $('auth-title').textContent = creating ? (step === 1 ? 'Create your access' : 'Set your access code') : 'Welcome back';
   $('auth-intro').textContent = creating
-    ? (step === 1 ? 'Enter your invite code and choose a unique username for your Fizz workspace.' : 'Choose a six digit code to protect your account.')
+    ? (step === 1 ? 'Enter your invite code and choose a unique username for your Fizzlayer workspace.' : 'Choose a six digit code to protect your account.')
     : 'Enter your username and six digit access code.';
   $('continue').innerHTML = creating && step === 1 ? 'Continue <span aria-hidden="true">→</span>' : creating ? 'Create account' : 'Sign in';
   $('code').autocomplete = creating ? 'new-password' : 'current-password';
@@ -61,7 +61,7 @@ function validUsername() {
 function validInvite() {
   const symbols = $('invite').value.replace(/[^A-Za-z0-9]/g, '').length;
   if (symbols < 12 || symbols > 16) {
-    showError('Enter the invite code from your Fizz invitation.');
+    showError('Enter the invite code from your Fizzlayer invitation.');
     $('invite').focus();
     return false;
   }
@@ -265,7 +265,7 @@ fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' })
   .catch(() => {});
 // /api/auth sends Google sign-in failures back as #auth_error=<code>.
 const authErrors = {
-  no_account: ['create', 'No Fizz account uses that Google account yet. Enter your invite code to sign up with Google.', 'invite'],
+  no_account: ['create', 'No Fizzlayer account uses that Google account yet. Enter your invite code to sign up with Google.', 'invite'],
   invalid_invite: ['create', 'That invite code is not valid or has already been used.', 'invite'],
   rate_limited: [null, 'Too many attempts. Try again in an hour.'],
   cancelled: [null, 'Google sign-in was cancelled.'],
