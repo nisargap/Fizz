@@ -143,6 +143,9 @@
       .closing p { margin: 1.4rem 0 0; font-size: 1.45rem; color: #bdd5dc; }
       .closing p a { display: inline; margin: 0; padding: 0; font-size: inherit; color: #a9eaf7; background: none; text-decoration: underline; }
       .closing p a:hover { background: none; color: #d1f7ff; }
+      .site-footer { position: relative; z-index: 1; width: min(1100px, calc(100% - 3rem)); margin: 0 auto; padding: 1.5rem 0 2.5rem; border-top: 2px solid #1a4050; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .6rem 1.5rem; font-size: 1.35rem; color: #9fbfc8; }
+      .site-footer nav { display: flex; gap: 1.5rem; }
+      .site-footer a { color: #a9eaf7; }
       textarea:focus-visible { outline: 3px solid white; outline-offset: 4px; }
       @media (max-width: 1000px) { .use-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
       @media (max-width: 860px) {
@@ -427,6 +430,10 @@
         <p>Running a warehouse, fleet, or plant? <a href="#business">Request early access</a></p>
       </section>
     </main>
+    <footer class="site-footer">
+      <span>Fizz. The physical layer for AI agents.</span>
+      <nav aria-label="Legal"><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></nav>
+    </footer>
     <script>
       addEventListener('DOMContentLoaded', () => {
         for (const card of document.querySelectorAll('.use-card[data-kind]')) card.querySelector('.use-head').prepend(window.fizzKinds.badge(card.dataset.kind));
