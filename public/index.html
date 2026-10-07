@@ -20,6 +20,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <script>
+      // Supabase sends email links to the home page when their redirect is not allowed. Finish them on the app page.
+      if (/(^|&)(access_token|error_code)=/.test(location.hash.slice(1))) location.replace('/app.html' + location.hash);
+    </script>
     <link rel="stylesheet" href="/sky.css">
     <script src="/sensor-kinds.js" defer></script>
     <style>

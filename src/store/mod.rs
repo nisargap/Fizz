@@ -1,6 +1,6 @@
 use std::{env, time::Duration};
 
-use reqwest::{Client, StatusCode, Url, header};
+use reqwest::{Client, Method, StatusCode, Url, header};
 use serde_json::Value;
 
 /// Supabase is accessed only from server-side Rust functions. Never send this
@@ -126,31 +126,49 @@ impl Supabase {
         url
     }
 
-    /// Exchange a Supabase Auth PKCE code for its session and return the verified `user`.
-    pub async fn exchange_auth_code(
+    /// Call a Supabase Auth endpoint, such as `token` or `passkeys/authentication/options`, and
+    /// return its status and JSON body so callers can map Supabase's error codes. `bearer` is a
+    /// user's access token for endpoints that act as that user. `client_ip` is forwarded so
+    /// Supabase's per-IP rate limits see the person rather than this server.
+    pub async fn auth(
         &self,
-        code: &str,
-        verifier: &str,
-    ) -> Result<Value, StoreError> {
+        method: Method,
+        path: &str,
+        query: &[(&str, &str)],
+        bearer: Option<&str>,
+        body: Option<Value>,
+        client_ip: Option<&str>,
+    ) -> Result<(StatusCode, Value), StoreError> {
         let mut url = self.rest_url.clone();
-        url.set_path("/auth/v1/token");
-        url.set_query(Some("grant_type=pkce"));
-        let response = self
+        url.set_path(&format!("/auth/v1/{path}"));
+        if !query.is_empty() {
+            url.query_pairs_mut().extend_pairs(query);
+        }
+        let mut request = self
             .client
-            .post(url)
+            .request(method, url)
             .header("apikey", &self.service_role_key)
-            .json(&serde_json::json!({"auth_code": code, "code_verifier": verifier}))
-            .send()
+            // Errors come back as {"code": "<error_code>", "message": ...}.
+            .header("x-supabase-api-version", "2024-01-01");
+        if let Some(token) = bearer {
+            request = request.header(header::AUTHORIZATION, format!("Bearer {token}"));
+        }
+        if let Some(ip) = client_ip {
+            request = request.header("x-forwarded-for", ip);
+        }
+        if let Some(body) = body {
+            request = request.json(&body);
+        }
+        let response = request.send().await.map_err(|_| StoreError::Unavailable)?;
+        let status = response.status();
+        let bytes = response
+            .bytes()
             .await
             .map_err(|_| StoreError::Unavailable)?;
-        if !response.status().is_success() {
-            return Err(StoreError::Unavailable);
-        }
-        let mut session: Value = response.json().await.map_err(|_| StoreError::Unavailable)?;
-        match session.get_mut("user").map(Value::take) {
-            Some(user) if user.get("id").and_then(Value::as_str).is_some() => Ok(user),
-            _ => Err(StoreError::Unavailable),
-        }
+        Ok((
+            status,
+            serde_json::from_slice(&bytes).unwrap_or(Value::Null),
+        ))
     }
 }
 

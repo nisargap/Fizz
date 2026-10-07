@@ -1,10 +1,10 @@
 pub mod agent;
 pub mod agents;
+pub mod auth;
 pub mod customer;
 pub mod devices;
 pub mod mcp;
 pub mod notify;
-pub mod oauth;
 pub mod phone;
 pub mod sensors;
 pub mod store;

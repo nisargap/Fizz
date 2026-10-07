@@ -30,7 +30,7 @@
     <article class="legal-panel" aria-labelledby="title">
       <div class="panel-top"><span>FIZZLAYER // PRIVACY POLICY</span><span>V1</span></div>
       <h1 id="title">Privacy Policy</h1>
-      <p class="updated">Effective October 6, 2026</p>
+      <p class="updated">Effective October 7, 2026</p>
 
       <section class="summary" aria-labelledby="short-version">
         <h2 id="short-version">The short version</h2>
@@ -73,8 +73,9 @@
 
       <h3>When you create an account</h3>
       <ul>
-        <li><strong>With a username:</strong> your username and six digit access code. We store the code only as a secure hash, never the code itself.</li>
+        <li><strong>With email:</strong> your email address and password. The password is stored only as a secure hash, never the password itself.</li>
         <li><strong>With Google:</strong> your Google account ID, email address, name, and profile picture link. We use your email address to suggest your Fizzlayer username.</li>
+        <li><strong>Passkeys:</strong> if you add one, we store only its public key. Your fingerprint, face, or device PIN never leaves your device.</li>
         <li>The invite code you used.</li>
       </ul>
 
@@ -140,6 +141,7 @@
       <ul>
         <li><strong>fizz_session</strong> keeps you signed in for up to 12 hours.</li>
         <li><strong>fizz_oauth</strong> protects Google sign-in and lasts at most 10 minutes.</li>
+        <li><strong>fizz_supabase</strong> holds your sign-in for up to 1 hour after you sign in, so you can add a passkey.</li>
       </ul>
       <p>A paired phone also saves its device key in the browser’s local storage so it stays connected.</p>
 
@@ -162,7 +164,7 @@
       <p>Fizzlayer is run from the United States, so your data is processed there.</p>
 
       <h2 id="security"><span class="num">09</span>Security</h2>
-      <p>We protect your data with encrypted connections. Access codes, session tokens, sensor keys, and agent tokens are stored only as hashes, and only our servers can reach the database. No system is perfectly secure, though. If a breach affects your data, we will tell you.</p>
+      <p>We protect your data with encrypted connections. Passwords, session tokens, sensor keys, and agent tokens are stored only as hashes, and only our servers can reach the database. No system is perfectly secure, though. If a breach affects your data, we will tell you.</p>
 
       <h2 id="children"><span class="num">10</span>Children</h2>
       <p>Fizzlayer is not for children under 13, and we do not knowingly collect their data. If you think a child has given us information, email us and we will delete it.</p>

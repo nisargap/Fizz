@@ -49,6 +49,12 @@ input::placeholder { color: #7b9daa; }
 .google-button:active { background: #303132; }
 .google-logo { display: grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; }
 .google-logo svg { display: block; width: 18px; height: 18px; }
+#email-wrap { margin-bottom: 1.6rem; }
+.text-button { margin-right: auto; padding: 0; border: 0; background: none; color: #a9eaf7; text-decoration: underline; text-underline-offset: 4px; font-size: 1.35rem; }
+.text-button:hover { color: #fff; }
+.email-sent { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.4rem; }
+.email-sent .text-button { margin-right: 0; }
+.passkey-button { width: 100%; margin-top: .75rem; }
 .legal-note { margin: 1.4rem 0 0; color: #9fbfc8; font-size: 1.2rem; }
 .legal-note a { color: #a9eaf7; }
 @media (max-width: 420px) { .panel { padding: 1.25rem; } .mode-switch button { font-size: 1.2rem; } }

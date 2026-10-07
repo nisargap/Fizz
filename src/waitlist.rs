@@ -8,7 +8,7 @@ use crate::{
 
 /// A plausible address: one @, a dotted domain, no spaces or control characters.
 /// Delivery is the real test; this keeps obvious junk out of the list.
-fn normalize_email(value: &str) -> Option<String> {
+pub fn normalize_email(value: &str) -> Option<String> {
     let email = value.trim().to_ascii_lowercase();
     let (local, domain) = email.split_once('@')?;
     let valid = email.len() <= 254

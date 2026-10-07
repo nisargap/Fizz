@@ -27,45 +27,44 @@
   <main class="shell">
     <a class="brand" href="/" aria-label="Fizzlayer home">Fizzlayer<span>.</span></a>
     <section class="panel" id="account-panel" aria-labelledby="auth-title">
-      <div class="panel-top"><span>FIZZLAYER // CUSTOMER ACCESS</span><span id="step-label">01 / 02</span></div>
+      <div class="panel-top"><span>FIZZLAYER // CUSTOMER ACCESS</span><span id="step-label">NEW ACCOUNT</span></div>
       <div id="auth">
-        <p class="eyebrow">Secure workspace setup</p>
-        <h1 id="auth-title">Create your access</h1>
-        <p class="intro" id="auth-intro">Start with a unique username for your Fizzlayer workspace.</p>
-        <div class="mode-switch" role="group" aria-label="Account action">
+        <p class="eyebrow">Secure workspace access</p>
+        <h1 id="auth-title">Create your account</h1>
+        <p class="intro" id="auth-intro" aria-live="polite">Enter your invite code, your email, and a password.</p>
+        <div class="mode-switch" id="mode-switch" role="group" aria-label="Account action">
           <button type="button" id="create-mode" class="selected" aria-pressed="true">Create account</button>
           <button type="button" id="sign-in-mode" aria-pressed="false">Sign in</button>
         </div>
         <form id="account-form" novalidate>
-          <div id="username-step">
-            <div id="invite-wrap">
-              <label for="invite">Invite code</label>
-              <input id="invite" name="invite" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="32" required placeholder="FIZZ-XXXX-XXXX-XXXX" aria-describedby="invite-help">
-              <p class="hint" id="invite-help">Fizzlayer is invite-only for now. No code? <a href="/">Join the waitlist</a>.</p>
-            </div>
-            <label for="username">Username</label>
-            <input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="24" pattern="[A-Za-z][A-Za-z0-9_]{2,23}" required placeholder="your_name" aria-describedby="username-help">
-            <p class="hint" id="username-help">3–24 letters, numbers, or underscores. Start with a letter.</p>
+          <div id="invite-wrap">
+            <label for="invite">Invite code</label>
+            <input id="invite" name="invite" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="32" required placeholder="FIZZ-XXXX-XXXX-XXXX" aria-describedby="invite-help">
+            <p class="hint" id="invite-help">Fizzlayer is invite-only for now. No code? <a href="/">Join the waitlist</a>.</p>
           </div>
-          <div id="code-step" hidden>
-            <div class="chosen"><span>Username</span><strong id="chosen-username"></strong><button type="button" id="edit-username">Edit</button></div>
-            <label for="code">Six digit access code</label>
-            <input id="code" name="code" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="••••••" aria-describedby="code-help">
-            <p class="hint" id="code-help">Use exactly six numbers. Keep your code private.</p>
-            <div id="confirm-wrap">
-              <label for="confirm-code">Confirm access code</label>
-              <input id="confirm-code" name="confirm-code" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="••••••">
-            </div>
+          <div id="email-wrap">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" maxlength="254" required placeholder="you@example.com">
+          </div>
+          <div id="password-wrap">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required aria-describedby="password-help">
+            <p class="hint" id="password-help">At least 8 characters.</p>
           </div>
           <p class="error" id="form-error" role="alert" hidden></p>
-          <div class="actions">
-            <button class="secondary" type="button" id="back" hidden>Back</button>
-            <button class="primary" type="submit" id="continue">Continue <span aria-hidden="true">→</span></button>
+          <div class="actions" id="form-actions">
+            <button class="text-button" type="button" id="forgot" hidden>Forgot password?</button>
+            <button class="primary" type="submit" id="continue">Create account</button>
           </div>
         </form>
+        <div class="email-sent" id="email-sent" hidden>
+          <button class="secondary" type="button" id="resend">Resend email</button>
+          <button class="text-button" type="button" id="back-to-sign-in">Back to sign in</button>
+        </div>
         <div class="oauth" id="oauth">
           <p class="oauth-divider"><span>or</span></p>
           <button class="google-button" type="button" id="google"><span class="google-logo" aria-hidden="true"><svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></span><span id="google-label">Continue with Google</span></button>
+          <button class="secondary passkey-button" type="button" id="passkey" hidden>Sign in with a passkey</button>
         </div>
         <p class="legal-note">By continuing, you agree to the <a href="/terms.html">Terms of Service</a> and <a href="/privacy.html">Privacy Policy</a>.</p>
       </div>
@@ -73,7 +72,7 @@
     <section class="setup-screen" id="setup" aria-labelledby="setup-title" hidden>
       <header class="setup-bar">
         <span>FIZZLAYER // SENSOR SETUP</span>
-        <div class="setup-account"><span id="setup-username"></span><button class="setup-sign-out" id="sign-out" type="button">Sign out</button></div>
+        <div class="setup-account"><span id="setup-username"></span><button class="setup-sign-out" id="add-passkey" type="button" hidden>Add passkey</button><button class="setup-sign-out" id="sign-out" type="button">Sign out</button></div>
       </header>
       <div class="agent-guide">
         <div class="agent-stage" aria-hidden="true">
@@ -106,7 +105,7 @@
       <button class="secondary setup-retry" id="setup-retry" type="button" hidden>Try again</button>
     </section>
     <section class="dashboard" id="dashboard" aria-labelledby="dashboard-title" hidden>
-      <header class="dashboard-bar"><a class="dashboard-logo" href="/">Fizzlayer<span>.</span></a><nav aria-label="Workspace"><a class="active" href="/app.html">Overview</a><a href="/sensors.html">Sensors</a><a href="/agents.html">Agents</a></nav><div class="dashboard-account"><span id="dashboard-username"></span><button type="button" id="dashboard-sign-out">Sign out</button></div></header>
+      <header class="dashboard-bar"><a class="dashboard-logo" href="/">Fizzlayer<span>.</span></a><nav aria-label="Workspace"><a class="active" href="/app.html">Overview</a><a href="/sensors.html">Sensors</a><a href="/agents.html">Agents</a></nav><div class="dashboard-account"><span id="dashboard-username"></span><button type="button" id="dashboard-passkey" hidden>Add passkey</button><button type="button" id="dashboard-sign-out">Sign out</button></div></header>
       <div class="dashboard-heading"><div><p class="setup-eyebrow">YOUR PHYSICAL WORLD, LIVE</p><h1 id="dashboard-title">Fizz is listening.</h1><p id="dashboard-subtitle">Your sensors are ready.</p></div><img src="/fizz-agent.svg" alt="" aria-hidden="true"></div>
       <div class="dashboard-grid">
         <div class="dashboard-main"><section class="dash-panel" aria-labelledby="live-title"><div class="section-heading"><div><p class="setup-eyebrow">01 / LIVE SIGNALS</p><h2 id="live-title">Sensors</h2></div><a href="/sensors.html">Manage sensors →</a></div><div class="live-sensors" id="live-sensors"></div><p class="dashboard-empty" id="live-empty" hidden>No sensors yet. <a href="/sensors.html">Add one</a> to start.</p></section>

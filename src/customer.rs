@@ -1,21 +1,30 @@
 use std::net::IpAddr;
 
 use http_body_util::{BodyExt, Limited};
+use reqwest::Method;
 use serde_json::{Value, json};
 use vercel_runtime::{Request, Response, ResponseBody};
 
 use crate::store::Supabase;
 
 const COOKIE_NAME: &str = "fizz_session";
+/// A signed-in person's Supabase access token, kept for up to an hour so they can add a passkey.
+pub const SUPABASE_COOKIE: &str = "fizz_supabase";
+pub const CLEAR_SUPABASE_COOKIE: &str =
+    "fizz_supabase=; HttpOnly; Secure; SameSite=Lax; Path=/api; Max-Age=0";
 
 pub fn reply(status: u16, body: Value, cookie: Option<&str>) -> Response<ResponseBody> {
+    reply_with(status, body, cookie.as_slice())
+}
+
+pub fn reply_with(status: u16, body: Value, cookies: &[&str]) -> Response<ResponseBody> {
     let mut builder = Response::builder()
         .status(status)
         .header("content-type", "application/json; charset=utf-8")
         .header("cache-control", "no-store")
         .header("x-content-type-options", "nosniff");
-    if let Some(cookie) = cookie {
-        builder = builder.header("set-cookie", cookie);
+    for cookie in cookies {
+        builder = builder.header("set-cookie", *cookie);
     }
     builder
         .body(ResponseBody::from(body))
@@ -60,38 +69,6 @@ fn ip_from_headers<'a>(header: impl Fn(&str) -> Option<&'a str>) -> Option<Strin
         .map(|ip| ip.to_string())
 }
 
-fn parse_credentials(data: &Value) -> Result<(String, String), Response<ResponseBody>> {
-    let username = data
-        .get("username")
-        .and_then(Value::as_str)
-        .unwrap_or("")
-        .trim()
-        .to_ascii_lowercase();
-    let code = data
-        .get("code")
-        .and_then(Value::as_str)
-        .unwrap_or("")
-        .to_owned();
-    let valid_username = (3..=24).contains(&username.len())
-        && username.as_bytes()[0].is_ascii_lowercase()
-        && username
-            .bytes()
-            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'_');
-    let valid_code = code.len() == 6 && code.bytes().all(|c| c.is_ascii_digit());
-    if !valid_username || !valid_code {
-        return Err(error(
-            400,
-            "invalid_credentials",
-            "Use 3–24 lowercase letters, numbers, or underscores for the username and exactly six digits for the code.",
-        ));
-    }
-    Ok((username, code))
-}
-
-pub async fn credentials(request: Request) -> Result<(String, String), Response<ResponseBody>> {
-    parse_credentials(&json_body(request, 1024).await?)
-}
-
 /// Invite codes look like FIZZ-ABCD-EFGH-JKMN. The database normalizes and checks them;
 /// this only rejects input that cannot possibly be a code.
 pub fn invite_code(invite: &str) -> Option<String> {
@@ -131,124 +108,6 @@ pub fn clear_cookie() -> &'static str {
     "fizz_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0"
 }
 
-pub async fn register(request: Request) -> Response<ResponseBody> {
-    let ip = client_ip(&request);
-    let data = match json_body(request, 1024).await {
-        Ok(value) => value,
-        Err(response) => return response,
-    };
-    let (username, code) = match parse_credentials(&data) {
-        Ok(value) => value,
-        Err(response) => return response,
-    };
-    let Some(invite) = data
-        .get("invite")
-        .and_then(Value::as_str)
-        .and_then(invite_code)
-    else {
-        return error(
-            400,
-            "invalid_invite",
-            "Enter the invite code from your Fizz invitation.",
-        );
-    };
-    let Ok(store) = Supabase::from_env() else {
-        return error(
-            503,
-            "database_unavailable",
-            "Account setup is temporarily unavailable.",
-        );
-    };
-    match store
-        .rpc(
-            "fizz_register",
-            json!({"p_username": username, "p_code": code, "p_invite": invite, "p_ip": ip}),
-        )
-        .await
-    {
-        Ok(value) => match value.get("error").and_then(Value::as_str) {
-            None => account_reply(value),
-            Some("rate_limited") => error(
-                429,
-                "rate_limited",
-                "Too many attempts. Try again in an hour.",
-            ),
-            Some("invalid_invite") => error(
-                403,
-                "invalid_invite",
-                "That invite code is not valid or has already been used.",
-            ),
-            Some("username_taken") => {
-                error(409, "username_taken", "That username is already taken.")
-            }
-            Some(_) => error(
-                400,
-                "invalid_credentials",
-                "Use 3–24 lowercase letters, numbers, or underscores for the username and exactly six digits for the code.",
-            ),
-        },
-        Err(_) => error(
-            503,
-            "database_unavailable",
-            "Account setup is temporarily unavailable.",
-        ),
-    }
-}
-
-pub async fn sign_in(request: Request) -> Response<ResponseBody> {
-    let (username, code) = match credentials(request).await {
-        Ok(value) => value,
-        Err(response) => return response,
-    };
-    let Ok(store) = Supabase::from_env() else {
-        return error(
-            503,
-            "database_unavailable",
-            "Sign-in is temporarily unavailable.",
-        );
-    };
-    match store
-        .rpc(
-            "fizz_sign_in",
-            json!({"p_username": username, "p_code": code}),
-        )
-        .await
-    {
-        Ok(value) if value.get("error").and_then(Value::as_str) == Some("rate_limited") => error(
-            429,
-            "rate_limited",
-            "Too many attempts. Try again in 15 minutes.",
-        ),
-        Ok(value) if value.get("error").is_some() => {
-            error(401, "invalid_credentials", "Username or code is incorrect.")
-        }
-        Ok(value) => account_reply(value),
-        Err(_) => error(
-            503,
-            "database_unavailable",
-            "Sign-in is temporarily unavailable.",
-        ),
-    }
-}
-
-fn account_reply(value: Value) -> Response<ResponseBody> {
-    let (Some(username), Some(token)) = (
-        value.get("username").and_then(Value::as_str),
-        value.get("token").and_then(Value::as_str),
-    ) else {
-        return error(
-            503,
-            "database_unavailable",
-            "Account setup is temporarily unavailable.",
-        );
-    };
-    reply(
-        200,
-        json!({"ok": true, "username": username}),
-        Some(&session_cookie(token)),
-    )
-}
-
 pub async fn current(request: Request) -> Response<ResponseBody> {
     let Some(token) = session_token(&request) else {
         return error(401, "unauthorized", "Sign in to continue.");
@@ -267,27 +126,44 @@ pub async fn current(request: Request) -> Response<ResponseBody> {
 }
 
 pub async fn sign_out(request: Request) -> Response<ResponseBody> {
-    if let Some(token) = session_token(&request) {
-        let Ok(store) = Supabase::from_env() else {
-            return error(
-                503,
-                "database_unavailable",
-                "Sign-out is temporarily unavailable.",
-            );
-        };
-        if store
+    let Ok(store) = Supabase::from_env() else {
+        return error(
+            503,
+            "database_unavailable",
+            "Sign-out is temporarily unavailable.",
+        );
+    };
+    if let Some(token) = session_token(&request)
+        && store
             .rpc("fizz_sign_out", json!({"p_token": token}))
             .await
             .is_err()
-        {
-            return error(
-                503,
-                "database_unavailable",
-                "Sign-out is temporarily unavailable.",
-            );
-        }
+    {
+        return error(
+            503,
+            "database_unavailable",
+            "Sign-out is temporarily unavailable.",
+        );
     }
-    reply(200, json!({"ok": true}), Some(clear_cookie()))
+    // Also end the Supabase session kept for adding passkeys. It expires within the hour anyway,
+    // so a failure here does not block signing out.
+    if let Some(token) = cookie(&request, SUPABASE_COOKIE) {
+        let _ = store
+            .auth(
+                Method::POST,
+                "logout",
+                &[("scope", "local")],
+                Some(token),
+                None,
+                None,
+            )
+            .await;
+    }
+    reply_with(
+        200,
+        json!({"ok": true}),
+        &[clear_cookie(), CLEAR_SUPABASE_COOKIE],
+    )
 }
 
 pub async fn sensor_choices(request: Request) -> Response<ResponseBody> {

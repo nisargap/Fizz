@@ -1,7 +1,5 @@
 const $ = (id) => document.getElementById(id);
 const form = $('account-form');
-let mode = 'create';
-let step = 1;
 const sensorNames = {
   water: 'Water', gas: 'Gas', radio: 'Radio', temperature: 'Temperature',
   pressure: 'Pressure', humidity: 'Humidity', sound: 'Sound', phone: 'Phone', custom: 'Custom',
@@ -9,52 +7,72 @@ const sensorNames = {
 let chosenKinds = [];
 let signedInUsername = '';
 
+// Sign-in goes through Supabase Auth via /api/auth: email and password, Google, or a passkey.
+// New accounts need an invite. Passkeys can only be added once signed in.
+const passkeysSupported = Boolean(window.PublicKeyCredential?.parseRequestOptionsFromJSON && navigator.credentials);
+const modes = {
+  create: {
+    label: 'NEW ACCOUNT', title: 'Create your account', intro: 'Enter your invite code, your email, and a password.',
+    submit: 'Create account', fields: ['invite', 'email', 'password'], google: 'Sign up with Google',
+  },
+  'sign-in': {
+    label: 'SIGN IN', title: 'Welcome back', intro: 'Sign in with your email and password, Google, or a passkey.',
+    submit: 'Sign in', fields: ['email', 'password'], google: 'Sign in with Google', passkey: true,
+  },
+  forgot: {
+    label: 'RESET', title: 'Reset your password', intro: 'Enter your email and we will send you a link to choose a new password.',
+    submit: 'Send reset link', fields: ['email'],
+  },
+  reset: {
+    label: 'NEW PASSWORD', title: 'Choose a new password', intro: 'Enter a new password for your Fizzlayer account.',
+    submit: 'Save password', fields: ['password'],
+  },
+  'check-email': { label: 'CHECK EMAIL', title: 'Check your email', intro: '', fields: [] },
+};
+let mode = 'create';
+let resetToken = ''; // From a password reset link; used once to set the new password.
+let pending = null; // What "Resend email" sends: { action, email }.
+
 function showError(message) {
   $('form-error').textContent = message;
   $('form-error').hidden = !message;
 }
 
-function render() {
-  const creating = mode === 'create';
-  $('create-mode').classList.toggle('selected', creating);
-  $('create-mode').setAttribute('aria-pressed', String(creating));
-  $('sign-in-mode').classList.toggle('selected', !creating);
-  $('sign-in-mode').setAttribute('aria-pressed', String(!creating));
-  $('username-step').hidden = creating && step === 2;
-  $('code-step').hidden = creating && step === 1;
-  $('chosen-username').textContent = $('username').value.trim().toLowerCase();
-  $('confirm-wrap').hidden = !creating;
-  $('invite-wrap').hidden = !creating;
-  $('edit-username').hidden = !creating;
-  $('back').hidden = !creating || step === 1;
-  $('oauth').hidden = creating && step === 2;
-  $('google-label').textContent = creating ? 'Sign up with Google' : 'Sign in with Google';
-  $('step-label').textContent = creating ? `${String(step).padStart(2, '0')} / 02` : 'SIGN IN';
-  $('auth-title').textContent = creating ? (step === 1 ? 'Create your access' : 'Set your access code') : 'Welcome back';
-  $('auth-intro').textContent = creating
-    ? (step === 1 ? 'Enter your invite code and choose a unique username for your Fizzlayer workspace.' : 'Choose a six digit code to protect your account.')
-    : 'Enter your username and six digit access code.';
-  $('continue').innerHTML = creating && step === 1 ? 'Continue <span aria-hidden="true">→</span>' : creating ? 'Create account' : 'Sign in';
-  $('code').autocomplete = creating ? 'new-password' : 'current-password';
+function render(intro) {
+  const current = modes[mode];
+  const choosing = mode === 'create' || mode === 'sign-in';
+  $('mode-switch').hidden = !choosing;
+  for (const [id, on] of [['create-mode', mode === 'create'], ['sign-in-mode', mode === 'sign-in']]) {
+    $(id).classList.toggle('selected', on);
+    $(id).setAttribute('aria-pressed', String(on));
+  }
+  for (const field of ['invite', 'email', 'password']) $(`${field}-wrap`).hidden = !current.fields.includes(field);
+  // The form stays visible in every mode so its error message can show; only its parts hide.
+  $('form-actions').hidden = !current.submit;
+  $('email-sent').hidden = mode !== 'check-email';
+  $('oauth').hidden = !choosing;
+  $('google-label').textContent = current.google || 'Continue with Google';
+  $('passkey').hidden = !(current.passkey && passkeysSupported);
+  $('forgot').hidden = mode !== 'sign-in' && mode !== 'forgot';
+  $('forgot').textContent = mode === 'forgot' ? 'Back to sign in' : 'Forgot password?';
+  $('step-label').textContent = current.label;
+  $('auth-title').textContent = current.title;
+  $('auth-intro').textContent = intro ?? current.intro;
+  $('continue').textContent = current.submit || '';
+  $('password').autocomplete = mode === 'sign-in' ? 'current-password' : 'new-password';
+  $('email').autocomplete = mode === 'sign-in' ? 'username' : 'email';
+  $('password-help').hidden = mode === 'sign-in';
   showError('');
 }
 
-function setMode(next) {
+function setMode(next, intro) {
+  const email = $('email').value;
   mode = next;
-  step = 1;
   form.reset();
-  render();
-  $('username').focus();
-}
-
-function validUsername() {
-  const name = $('username').value.trim();
-  if (!/^[A-Za-z][A-Za-z0-9_]{2,23}$/.test(name)) {
-    showError('Use 3–24 letters, numbers, or underscores. Start with a letter.');
-    $('username').focus();
-    return false;
-  }
-  return true;
+  $('email').value = email; // Keep a typed address when moving between sign-in and reset.
+  render(intro);
+  const first = modes[next].fields.find((field) => !(field === 'email' && email));
+  if (first) $(first).focus();
 }
 
 // Invite codes look like FIZZ-ABCD-EFGH-JKMN; the server does the real check.
@@ -68,19 +86,36 @@ function validInvite() {
   return true;
 }
 
-function validCode() {
-  if (!/^[0-9]{6}$/.test($('code').value)) {
-    showError('Enter exactly six digits for your access code.');
-    $('code').focus();
-    return false;
-  }
-  if (mode === 'create' && $('code').value !== $('confirm-code').value) {
-    showError('The access codes do not match.');
-    $('confirm-code').focus();
+function validEmail() {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('email').value.trim())) {
+    showError('Enter a valid email address.');
+    $('email').focus();
     return false;
   }
   return true;
 }
+
+function validPassword() {
+  const length = $('password').value.length;
+  if (length < 8 || length > 72) {
+    showError(mode === 'sign-in' ? 'Enter your password.' : 'Use a password of 8 to 72 characters.');
+    $('password').focus();
+    return false;
+  }
+  return true;
+}
+
+// Passkey options and responses use WebAuthn's JSON form, so they pass straight through.
+async function passkeyCredential(options, creating) {
+  const publicKey = options.publicKey || options;
+  const credential = creating
+    ? await navigator.credentials.create({ publicKey: PublicKeyCredential.parseCreationOptionsFromJSON(publicKey) })
+    : await navigator.credentials.get({ publicKey: PublicKeyCredential.parseRequestOptionsFromJSON(publicKey) });
+  return credential.toJSON();
+}
+
+// The browser throws NotAllowedError when the person closes the passkey prompt.
+const cancelled = (error) => error?.name === 'NotAllowedError' || error?.name === 'AbortError';
 
 function setupError(message) {
   $('setup-error').textContent = message;
@@ -155,37 +190,113 @@ async function send(url, method, data) {
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
-  if (mode === 'create' && step === 1 && !validInvite()) return;
-  if (!validUsername()) return;
-  if (mode === 'create' && step === 1) {
-    step = 2;
-    render();
-    $('code').focus();
-    return;
-  }
-  if (!validCode()) return;
+  const { fields } = modes[mode];
+  if (fields.includes('invite') && !validInvite()) return;
+  if (fields.includes('email') && !validEmail()) return;
+  if (fields.includes('password') && !validPassword()) return;
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  const body = {
+    create: { action: 'sign_up', invite: $('invite').value.trim(), email, password },
+    'sign-in': { action: 'sign_in', email, password },
+    forgot: { action: 'recover', email },
+    reset: { action: 'link', access_token: resetToken, password },
+  }[mode];
   const button = $('continue');
   button.disabled = true;
   showError('');
   try {
-    const result = await send(mode === 'create' ? '/api/onboarding' : '/api/session', 'POST', {
-      username: $('username').value.trim(), code: $('code').value,
-      ...(mode === 'create' ? { invite: $('invite').value.trim() } : {}),
-    });
-    form.reset();
-    showSetup(result.username);
-  } catch (error) {
-    // Invite and username problems are fixed on the first step.
-    const field = { invalid_invite: 'invite', username_taken: 'username' }[error.code];
-    if (mode === 'create' && field) {
-      step = 1;
-      render();
-      $(field).focus();
+    const result = await send('/api/auth', 'POST', body);
+    if (result.username) {
+      resetToken = '';
+      form.reset();
+      showSetup(result.username);
+    } else if (mode === 'forgot') {
+      pending = { action: 'recover', email };
+      setMode('check-email', `If ${email} has a Fizzlayer account, we sent it a link to choose a new password.`);
+    } else {
+      pending = { action: 'resend', email };
+      setMode('check-email', `We sent a confirmation link to ${email}. Open it on any device to finish creating your account.`);
     }
+  } catch (error) {
+    if (error.code === 'email_not_confirmed') {
+      pending = { action: 'resend', email };
+      setMode('check-email', `Confirm your email first. Open the link we sent to ${email}, or send it again.`);
+      return;
+    }
+    if (error.code === 'link_expired' && mode === 'reset') {
+      setMode('forgot');
+      showError(error.message);
+      return;
+    }
+    showError(error.message);
+    const field = { invalid_invite: 'invite', invalid_email: 'email', weak_password: 'password', same_password: 'password' }[error.code];
+    if (field && modes[mode].fields.includes(field)) $(field).focus();
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$('resend').addEventListener('click', async () => {
+  if (!pending) return;
+  const button = $('resend');
+  button.disabled = true;
+  showError('');
+  try {
+    await send('/api/auth', 'POST', pending);
+    $('auth-intro').textContent = `Sent again to ${pending.email}. Check your inbox and spam folder.`;
+  } catch (error) {
     showError(error.message);
   } finally {
     button.disabled = false;
   }
+});
+
+$('passkey').addEventListener('click', async () => {
+  const button = $('passkey');
+  button.disabled = true;
+  showError('');
+  try {
+    const start = await send('/api/auth', 'POST', { action: 'passkey_options' });
+    const credential = await passkeyCredential(start.options, false);
+    const result = await send('/api/auth', 'POST', { action: 'passkey_sign_in', challenge_id: start.challenge_id, credential });
+    showSetup(result.username);
+  } catch (error) {
+    if (!cancelled(error)) showError(error instanceof DOMException ? 'That passkey didn’t work. Try again.' : error.message);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+async function addPasskey(button) {
+  const label = button.textContent;
+  button.disabled = true;
+  try {
+    const start = await send('/api/auth', 'POST', { action: 'passkey_add_options' });
+    const credential = await passkeyCredential(start.options, true);
+    await send('/api/auth', 'POST', { action: 'passkey_add', challenge_id: start.challenge_id, credential });
+    button.textContent = 'Passkey added';
+    setTimeout(() => { button.textContent = label; button.disabled = false; }, 4000);
+    return;
+  } catch (error) {
+    if (!cancelled(error)) alert(error instanceof DOMException ? 'That passkey could not be saved. Try again.' : error.message);
+  }
+  button.disabled = false;
+}
+for (const id of ['add-passkey', 'dashboard-passkey']) {
+  $(id).hidden = !passkeysSupported;
+  $(id).addEventListener('click', () => addPasskey($(id)));
+}
+
+$('create-mode').addEventListener('click', () => setMode('create'));
+$('sign-in-mode').addEventListener('click', () => setMode('sign-in'));
+$('forgot').addEventListener('click', () => setMode(mode === 'forgot' ? 'sign-in' : 'forgot'));
+$('back-to-sign-in').addEventListener('click', () => setMode('sign-in'));
+// Google sign-in leaves the page; new accounts still need an invite, which rides along.
+$('google').addEventListener('click', () => {
+  if (mode === 'create' && !validInvite()) return;
+  const invite = mode === 'create' ? `&invite=${encodeURIComponent($('invite').value.trim())}` : '';
+  location.assign(`/api/auth?provider=google${invite}`);
 });
 
 document.querySelectorAll('.sensor-card').forEach((card) => {
@@ -199,16 +310,6 @@ document.querySelectorAll('.sensor-card').forEach((card) => {
   card.style.setProperty('--sensor-color', info.color);
   card.replaceChildren(window.fizzKinds.badge(card.dataset.kind, 'sensor-icon'), name, detail);
 });
-$('create-mode').addEventListener('click', () => setMode('create'));
-$('sign-in-mode').addEventListener('click', () => setMode('sign-in'));
-// Google sign-in leaves the page; new accounts still need an invite, which rides along.
-$('google').addEventListener('click', () => {
-  if (mode === 'create' && !validInvite()) return;
-  const invite = mode === 'create' ? `&invite=${encodeURIComponent($('invite').value.trim())}` : '';
-  location.assign(`/api/auth?provider=google${invite}`);
-});
-$('back').addEventListener('click', () => { step = 1; render(); $('username').focus(); });
-$('edit-username').addEventListener('click', () => { step = 1; render(); $('username').focus(); });
 document.querySelectorAll('.sensor-card').forEach((card) => card.addEventListener('click', async () => {
   const cards = document.querySelectorAll('.sensor-card');
   const removing = chosenKinds.includes(card.dataset.kind);
@@ -259,11 +360,11 @@ async function signOut() {
 $('sign-out').addEventListener('click', signOut);
 $('dashboard-sign-out').addEventListener('click', signOut);
 
-fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' })
-  .then((response) => response.ok ? response.json() : null)
-  .then((data) => { if (data?.username) showSetup(data.username); })
-  .catch(() => {});
-// /api/auth sends Google sign-in failures back as #auth_error=<code>.
+// Arriving here can carry state in the URL fragment:
+// - #sign-in from the landing page's Sign in link.
+// - #auth_error=<code> when Google sign-in fails in /api/auth.
+// - #access_token=...&type=signup|recovery from a Supabase email link, or #error=... if it expired.
+const hash = new URLSearchParams(location.hash.slice(1));
 const authErrors = {
   no_account: ['create', 'No Fizzlayer account uses that Google account yet. Enter your invite code to sign up with Google.', 'invite'],
   invalid_invite: ['create', 'That invite code is not valid or has already been used.', 'invite'],
@@ -272,15 +373,42 @@ const authErrors = {
   expired: [null, 'Google sign-in took too long or was interrupted. Try again.'],
   failed: [null, 'Google sign-in is temporarily unavailable. Try again.'],
 };
-const authError = location.hash.match(/^#auth_error=(\w+)$/)?.[1];
+const linkToken = hash.get('access_token');
+const authError = hash.get('auth_error');
 if (location.hash === '#sign-in') mode = 'sign-in';
-if (authError) {
-  history.replaceState(null, '', location.pathname);
-  mode = (authErrors[authError] || authErrors.failed)[0] || mode;
-}
-render();
-if (authError) {
-  const [, message, field] = authErrors[authError] || authErrors.failed;
-  showError(message);
-  if (field) $(field).focus();
+// Tokens must not linger in the address bar or history.
+if (location.hash) history.replaceState(null, '', location.pathname);
+
+if (linkToken && hash.get('type') === 'recovery') {
+  resetToken = linkToken;
+  mode = 'reset';
+  render();
+  $('password').focus();
+} else if (linkToken) {
+  mode = 'sign-in';
+  render('Confirming your email…');
+  send('/api/auth', 'POST', { action: 'link', access_token: linkToken })
+    .then((result) => showSetup(result.username))
+    .catch((error) => {
+      const fix = authErrors[error.code];
+      if (fix?.[0]) mode = fix[0];
+      render();
+      showError(error.message);
+    });
+} else if (hash.get('error') || hash.get('error_code')) {
+  mode = 'sign-in';
+  render();
+  showError('That link has expired or was already used. Request a new one.');
+} else {
+  if (authError) mode = (authErrors[authError] || authErrors.failed)[0] || mode;
+  render();
+  if (authError) {
+    const [, message, field] = authErrors[authError] || authErrors.failed;
+    showError(message);
+    if (field) $(field).focus();
+  }
+  fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' })
+    .then((response) => response.ok ? response.json() : null)
+    .then((data) => { if (data?.username) showSetup(data.username); })
+    .catch(() => {});
 }

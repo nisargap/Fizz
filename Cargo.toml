@@ -18,10 +18,6 @@ name = "status"
 path = "api/status.rs"
 
 [[bin]]
-name = "onboarding"
-path = "api/onboarding.rs"
-
-[[bin]]
 name = "auth"
 path = "api/auth.rs"
 

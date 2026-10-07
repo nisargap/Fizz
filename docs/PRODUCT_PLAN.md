@@ -8,7 +8,7 @@ The nine types are Water, Gas, Radio, Temperature, Pressure, Humidity, Sound, Ph
 
 ## Current state and decisions
 
-- The live app has username plus six digit code sign-in, a session cookie, and a multi-select grid of sensor type **choices**. Those choices are stored in `fizz_sensor_choices`; no instances or readings exist yet.
+- The live app has email and password, Google, and passkey sign-in through Supabase Auth, a session cookie, and a multi-select grid of sensor type **choices**. Those choices are stored in `fizz_sensor_choices`; no instances or readings exist yet.
 - The frontend is static HTML/CSS/JavaScript. API routes are Rust Vercel Functions. Supabase is the source of truth. A private experimental Supabase Compute service exists but currently serves only `/health`.
 - Keep Rust for API and agent orchestration. Call Vercel AI Gateway from the Rust chat function, as agreed in the earlier plan. The model never receives Supabase credentials or sensor API keys.
 - Use one scoped API key per API sensor instance, shown only at creation or rotation. Do not use one account-wide `API_KEY` for all sensors; revoking one device should leave others working.
