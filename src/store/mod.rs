@@ -112,4 +112,64 @@ impl Supabase {
         }
         Err(StoreError::Unavailable)
     }
+
+    /// Where the browser starts a Supabase Auth OAuth sign-in. Supabase sends it back to
+    /// `redirect_to` with a single-use `code` that only the holder of the PKCE verifier can use.
+    pub fn authorize_url(&self, provider: &str, redirect_to: &str, code_challenge: &str) -> Url {
+        let mut url = self.rest_url.clone();
+        url.set_path("/auth/v1/authorize");
+        url.query_pairs_mut()
+            .append_pair("provider", provider)
+            .append_pair("redirect_to", redirect_to)
+            .append_pair("code_challenge", code_challenge)
+            .append_pair("code_challenge_method", "s256");
+        url
+    }
+
+    /// Exchange a Supabase Auth PKCE code for its session and return the verified `user`.
+    pub async fn exchange_auth_code(
+        &self,
+        code: &str,
+        verifier: &str,
+    ) -> Result<Value, StoreError> {
+        let mut url = self.rest_url.clone();
+        url.set_path("/auth/v1/token");
+        url.set_query(Some("grant_type=pkce"));
+        let response = self
+            .client
+            .post(url)
+            .header("apikey", &self.service_role_key)
+            .json(&serde_json::json!({"auth_code": code, "code_verifier": verifier}))
+            .send()
+            .await
+            .map_err(|_| StoreError::Unavailable)?;
+        if !response.status().is_success() {
+            return Err(StoreError::Unavailable);
+        }
+        let mut session: Value = response.json().await.map_err(|_| StoreError::Unavailable)?;
+        match session.get_mut("user").map(Value::take) {
+            Some(user) if user.get("id").and_then(Value::as_str).is_some() => Ok(user),
+            _ => Err(StoreError::Unavailable),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn authorize_url_targets_supabase_auth_with_an_encoded_redirect() {
+        let store = Supabase {
+            client: Client::new(),
+            rest_url: Url::parse("https://ref.supabase.co/rest/v1/").unwrap(),
+            service_role_key: "key".into(),
+        };
+        assert_eq!(
+            store
+                .authorize_url("google", "https://fizzlayer.com/api/auth", "abc")
+                .as_str(),
+            "https://ref.supabase.co/auth/v1/authorize?provider=google&redirect_to=https%3A%2F%2Ffizzlayer.com%2Fapi%2Fauth&code_challenge=abc&code_challenge_method=s256"
+        );
+    }
 }

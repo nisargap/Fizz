@@ -136,6 +136,7 @@ dependencies = [
  "base64 0.22.1",
  "http-body-util",
  "reqwest",
+ "ring",
  "serde_json",
  "tokio",
  "vercel_runtime",

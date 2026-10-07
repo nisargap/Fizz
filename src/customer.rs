@@ -94,8 +94,8 @@ pub async fn credentials(request: Request) -> Result<(String, String), Response<
 
 /// Invite codes look like FIZZ-ABCD-EFGH-JKMN. The database normalizes and checks them;
 /// this only rejects input that cannot possibly be a code.
-fn invite_code(data: &Value) -> Option<String> {
-    let invite = data.get("invite").and_then(Value::as_str)?.trim();
+pub fn invite_code(invite: &str) -> Option<String> {
+    let invite = invite.trim();
     let symbols = invite.bytes().filter(u8::is_ascii_alphanumeric).count();
     ((12..=16).contains(&symbols)
         && invite.len() <= 32
@@ -105,7 +105,7 @@ fn invite_code(data: &Value) -> Option<String> {
     .then(|| invite.to_owned())
 }
 
-pub fn session_token(request: &Request) -> Option<String> {
+pub fn cookie<'a>(request: &'a Request, name: &str) -> Option<&'a str> {
     request
         .headers()
         .get("cookie")?
@@ -113,12 +113,17 @@ pub fn session_token(request: &Request) -> Option<String> {
         .ok()?
         .split(';')
         .filter_map(|part| part.trim().split_once('='))
-        .find(|(name, _)| *name == COOKIE_NAME)
-        .map(|(_, value)| value.to_owned())
-        .filter(|value| value.len() == 64 && value.bytes().all(|c| c.is_ascii_hexdigit()))
+        .find(|(key, _)| *key == name)
+        .map(|(_, value)| value)
 }
 
-fn session_cookie(token: &str) -> String {
+pub fn session_token(request: &Request) -> Option<String> {
+    cookie(request, COOKIE_NAME)
+        .filter(|value| value.len() == 64 && value.bytes().all(|c| c.is_ascii_hexdigit()))
+        .map(str::to_owned)
+}
+
+pub fn session_cookie(token: &str) -> String {
     format!("{COOKIE_NAME}={token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=43200")
 }
 
@@ -136,7 +141,11 @@ pub async fn register(request: Request) -> Response<ResponseBody> {
         Ok(value) => value,
         Err(response) => return response,
     };
-    let Some(invite) = invite_code(&data) else {
+    let Some(invite) = data
+        .get("invite")
+        .and_then(Value::as_str)
+        .and_then(invite_code)
+    else {
         return error(
             400,
             "invalid_invite",
@@ -395,16 +404,15 @@ mod tests {
 
     #[test]
     fn invite_codes_accept_typed_variants_and_reject_junk() {
-        let code = |v: &str| invite_code(&json!({ "invite": v }));
         assert_eq!(
-            code(" FIZZ-ABCD-EFGH-JKMN "),
+            invite_code(" FIZZ-ABCD-EFGH-JKMN "),
             Some("FIZZ-ABCD-EFGH-JKMN".into())
         );
-        assert!(code("abcd efgh jkmn").is_some());
-        assert!(code("FIZZ-ABCD").is_none());
-        assert!(code("FIZZ-ABCD-EFGH-JKMN-PQRS").is_none());
-        assert!(code("FIZZ_ABCD_EFGH_JKMN").is_none());
-        assert!(invite_code(&json!({})).is_none());
+        assert!(invite_code("abcd efgh jkmn").is_some());
+        assert!(invite_code("FIZZ-ABCD").is_none());
+        assert!(invite_code("FIZZ-ABCD-EFGH-JKMN-PQRS").is_none());
+        assert!(invite_code("FIZZ_ABCD_EFGH_JKMN").is_none());
+        assert!(invite_code("").is_none());
     }
 
     #[test]

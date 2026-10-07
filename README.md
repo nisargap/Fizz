@@ -58,7 +58,26 @@ Codes are case-insensitive, and dashes, spaces, and the `FIZZ` prefix are option
 
 Open `/app.html` with an invite code to create an account. Usernames are unique, case-insensitive, and limited to 3–24 letters, numbers, and underscores; they must start with a letter. Customers choose a six digit access code and confirm it. The code is stored as a bcrypt hash in Supabase. After registration or sign-in, a random session token is stored only as a hash and sent in a 12 hour HttpOnly, Secure, SameSite=Lax cookie. Five incorrect codes lock that username for 15 minutes.
 
-Apply the migration with `supabase db push --project-ref <project-ref>`, then set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel. The browser calls only Fizz's `/api/waitlist`, `/api/onboarding`, `/api/session`, and `/api/me` endpoints; it never receives a Supabase key.
+### Google sign-in
+
+Customers can also create an account or sign in with Google. Supabase Auth verifies the Google identity, and Fizz then issues its normal session cookie, so the rest of the API is unchanged:
+
+1. **Continue with Google** on `/app.html` opens `GET /api/auth?provider=google`, adding `&invite=...` when creating an account. The function stores a PKCE verifier (and the invite) in a 10 minute HttpOnly cookie scoped to `/api/auth`, then redirects to Supabase's `/auth/v1/authorize`.
+2. Supabase signs the user in with Google and redirects back to `GET /api/auth?code=...`. The function exchanges the code for the Supabase user using the verifier. A code minted for a different browser fails.
+3. `fizz_oauth_sign_in` finds the customer linked to that `auth.users` id. If there is none, it needs an unused invite code (consumed as with regular sign-up) and creates a customer whose username comes from the email address, such as `janedoe` or `janedoe_4821`. Accounts are never matched by email, so Google sign-in cannot take over an existing username/code account.
+4. The browser lands on `/app.html` with a `fizz_session` cookie. Failures come back as `/app.html#auth_error=<code>` (`no_account`, `invalid_invite`, `rate_limited`, `cancelled`, `expired`, or `failed`).
+
+Google-only customers have no access code and cannot sign in with one. The browser never receives a Supabase key or token.
+
+To enable it:
+
+1. In Google Cloud Console, create an OAuth client ID of type **Web application**. Add `https://<project-ref>.supabase.co/auth/v1/callback` as an authorized redirect URI.
+2. In Supabase, open **Authentication → Sign In / Providers → Google**, turn it on, and paste the client ID and secret.
+3. In Supabase, open **Authentication → URL Configuration** and add `https://fizzlayer.com/api/auth` to **Redirect URLs**. For local development, also add `http://localhost:3000/api/auth`. The callback is built from the request's host, so each domain you sign in from needs its own entry.
+
+No new Vercel variables are needed; the function uses `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+
+Apply the migration with `supabase db push --project-ref <project-ref>`, then set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel. The browser calls only Fizz's `/api/waitlist`, `/api/onboarding`, `/api/session`, `/api/auth`, and `/api/me` endpoints; it never receives a Supabase key.
 
 After sign-in, new accounts choose sensor types and press **Start with sample data**. Fizz creates simulated sensors and opens the dashboard. Existing choices migrate into sensor instances. Simulated values advance when an authenticated dashboard or Sensors page requests data, at most once per 15 seconds per sensor; the browser polls while open.
 

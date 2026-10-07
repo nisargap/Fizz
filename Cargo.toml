@@ -8,6 +8,7 @@ description = "The physical layer for AI agents"
 base64 = "0.22"
 http-body-util = "0.1"
 reqwest = { version = "0.12", default-features = false, features = ["json", "multipart", "rustls-tls"] }
+ring = "0.17"
 serde_json = "1"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 vercel_runtime = "2"
@@ -19,6 +20,10 @@ path = "api/status.rs"
 [[bin]]
 name = "onboarding"
 path = "api/onboarding.rs"
+
+[[bin]]
+name = "auth"
+path = "api/auth.rs"
 
 [[bin]]
 name = "session"

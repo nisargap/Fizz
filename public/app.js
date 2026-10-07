@@ -27,6 +27,8 @@ function render() {
   $('invite-wrap').hidden = !creating;
   $('edit-username').hidden = !creating;
   $('back').hidden = !creating || step === 1;
+  $('oauth').hidden = creating && step === 2;
+  $('google').textContent = creating ? 'Sign up with Google' : 'Sign in with Google';
   $('step-label').textContent = creating ? `${String(step).padStart(2, '0')} / 02` : 'SIGN IN';
   $('auth-title').textContent = creating ? (step === 1 ? 'Create your access' : 'Set your access code') : 'Welcome back';
   $('auth-intro').textContent = creating
@@ -199,6 +201,12 @@ document.querySelectorAll('.sensor-card').forEach((card) => {
 });
 $('create-mode').addEventListener('click', () => setMode('create'));
 $('sign-in-mode').addEventListener('click', () => setMode('sign-in'));
+// Google sign-in leaves the page; new accounts still need an invite, which rides along.
+$('google').addEventListener('click', () => {
+  if (mode === 'create' && !validInvite()) return;
+  const invite = mode === 'create' ? `&invite=${encodeURIComponent($('invite').value.trim())}` : '';
+  location.assign(`/api/auth?provider=google${invite}`);
+});
 $('back').addEventListener('click', () => { step = 1; render(); $('username').focus(); });
 $('edit-username').addEventListener('click', () => { step = 1; render(); $('username').focus(); });
 document.querySelectorAll('.sensor-card').forEach((card) => card.addEventListener('click', async () => {
@@ -255,5 +263,24 @@ fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' })
   .then((response) => response.ok ? response.json() : null)
   .then((data) => { if (data?.username) showSetup(data.username); })
   .catch(() => {});
+// /api/auth sends Google sign-in failures back as #auth_error=<code>.
+const authErrors = {
+  no_account: ['create', 'No Fizz account uses that Google account yet. Enter your invite code to sign up with Google.', 'invite'],
+  invalid_invite: ['create', 'That invite code is not valid or has already been used.', 'invite'],
+  rate_limited: [null, 'Too many attempts. Try again in an hour.'],
+  cancelled: [null, 'Google sign-in was cancelled.'],
+  expired: [null, 'Google sign-in took too long or was interrupted. Try again.'],
+  failed: [null, 'Google sign-in is temporarily unavailable. Try again.'],
+};
+const authError = location.hash.match(/^#auth_error=(\w+)$/)?.[1];
 if (location.hash === '#sign-in') mode = 'sign-in';
+if (authError) {
+  history.replaceState(null, '', location.pathname);
+  mode = (authErrors[authError] || authErrors.failed)[0] || mode;
+}
 render();
+if (authError) {
+  const [, message, field] = authErrors[authError] || authErrors.failed;
+  showError(message);
+  if (field) $(field).focus();
+}

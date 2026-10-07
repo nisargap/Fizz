@@ -39,6 +39,9 @@ input::placeholder { color: #7b9daa; }
 .primary:hover { background: #d1f7ff; }
 .secondary { background: transparent; color: #a9eaf7; }
 .secondary:hover { background: #18394a; }
+.oauth-divider { display: flex; align-items: center; gap: .75rem; color: #7b9daa; font-size: 1.2rem; text-transform: uppercase; letter-spacing: .12em; margin: 1.8rem 0 1rem; }
+.oauth-divider::before, .oauth-divider::after { content: ""; flex: 1; border-top: 2px solid #31546a; }
+.oauth-google { width: 100%; }
 @media (max-width: 420px) { .panel { padding: 1.25rem; } .mode-switch button { font-size: 1.2rem; } }
 
 .setup-screen { border: 3px solid #69bed0; background: var(--glass); box-shadow: 10px 10px 0 #071018; padding: clamp(1.25rem, 4vw, 2.5rem); }
