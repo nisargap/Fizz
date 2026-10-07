@@ -28,7 +28,7 @@ function render() {
   $('edit-username').hidden = !creating;
   $('back').hidden = !creating || step === 1;
   $('oauth').hidden = creating && step === 2;
-  $('google').textContent = creating ? 'Sign up with Google' : 'Sign in with Google';
+  $('google-label').textContent = creating ? 'Sign up with Google' : 'Sign in with Google';
   $('step-label').textContent = creating ? `${String(step).padStart(2, '0')} / 02` : 'SIGN IN';
   $('auth-title').textContent = creating ? (step === 1 ? 'Create your access' : 'Set your access code') : 'Welcome back';
   $('auth-intro').textContent = creating
