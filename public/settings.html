@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b1722">
+<title>Settings · Fizzlayer</title>
+<link rel="icon" href="/fizz-agent.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/sky.css"><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/dashboard.css"><link rel="stylesheet" href="/sensors.css"><link rel="stylesheet" href="/settings.css">
+<script src="/passkey.js" defer></script>
+<script src="/settings.js" defer></script>
+</head>
+<body><div class="pixel-sky" aria-hidden="true"><span class="shooting-star shooting-star-one"></span><span class="shooting-star shooting-star-two"></span><span class="shooting-star shooting-star-three"></span></div>
+<main class="shell dashboard-active"><section class="dashboard" aria-labelledby="settings-title">
+  <header class="dashboard-bar"><a class="dashboard-logo" href="/">Fizzlayer<span>.</span></a><nav aria-label="Workspace"><a href="/app.html">Overview</a><a href="/sensors.html">Sensors</a><a href="/agents.html">Agents</a><a class="active" href="/settings.html">Settings</a></nav><div class="dashboard-account"><span id="settings-username"></span><button type="button" id="settings-sign-out">Sign out</button></div></header>
+  <div class="sensors-heading"><div><p class="setup-eyebrow">YOUR ACCOUNT</p><h1 id="settings-title">Settings</h1><p>Your account details and the ways you sign in.</p></div><img src="/fizz-agent.svg" alt="" aria-hidden="true"></div>
+
+  <section class="dash-panel settings-panel" aria-labelledby="account-title">
+    <div class="section-heading"><div><p class="setup-eyebrow">01 / ACCOUNT</p><h2 id="account-title">Account</h2></div></div>
+    <dl class="account-details">
+      <div><dt>Username</dt><dd id="account-username">…</dd></div>
+      <div><dt>Email</dt><dd id="account-email">…</dd></div>
+      <div><dt>Sign-in methods</dt><dd id="account-methods">…</dd></div>
+      <div><dt>Member since</dt><dd id="account-since">…</dd></div>
+    </dl>
+  </section>
+
+  <section class="dash-panel settings-panel" aria-labelledby="passkeys-title">
+    <div class="section-heading">
+      <div><p class="setup-eyebrow">02 / SIGN-IN</p><h2 id="passkeys-title" class="passkeys-title"><span class="key-badge" data-key-icon></span>Passkeys</h2></div>
+      <button class="primary add-passkey" id="add-passkey" type="button" aria-label="Add a passkey" title="Add a passkey">+</button>
+    </div>
+    <p class="settings-intro">Sign in with Face ID, Touch ID, Windows Hello, or a security key instead of a password.</p>
+    <ul id="passkey-list" class="passkey-list"></ul>
+    <p id="passkey-empty" class="dashboard-empty" hidden>No passkeys yet. Press + to add one.</p>
+    <p class="form-message" id="passkey-message" role="status"></p>
+    <button class="secondary sign-in-again" id="sign-in-again" type="button" hidden>Sign in again</button>
+  </section>
+  <p class="form-message" id="page-error" role="alert"></p>
+</section></main>
+<template id="key-icon"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill-rule="evenodd" d="M3 4h4v1h1v1h1v4h-1v1h-1v1H3v-1H2v-1H1V6h1V5h1zM4 7v2h2V7zM9 7h6v2H9zM12 9h1v2h-1zM14 9h1v3h-1z"/></svg></template>
+</body></html>

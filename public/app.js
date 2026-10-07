@@ -8,8 +8,8 @@ let chosenKinds = [];
 let signedInUsername = '';
 
 // Sign-in goes through Supabase Auth via /api/auth: email and password, Google, or a passkey.
-// New accounts need an invite. Passkeys can only be added once signed in.
-const passkeysSupported = Boolean(window.PublicKeyCredential?.parseRequestOptionsFromJSON && navigator.credentials);
+// New accounts need an invite. Passkeys are added on the Settings page once signed in.
+const passkeysSupported = window.fizzPasskey.supported;
 const modes = {
   create: {
     label: 'NEW ACCOUNT', title: 'Create your account', intro: 'Enter your invite code, your email, and a password.',
@@ -105,17 +105,6 @@ function validPassword() {
   return true;
 }
 
-// Passkey options and responses use WebAuthn's JSON form, so they pass straight through.
-async function passkeyCredential(options, creating) {
-  const publicKey = options.publicKey || options;
-  const credential = creating
-    ? await navigator.credentials.create({ publicKey: PublicKeyCredential.parseCreationOptionsFromJSON(publicKey) })
-    : await navigator.credentials.get({ publicKey: PublicKeyCredential.parseRequestOptionsFromJSON(publicKey) });
-  return credential.toJSON();
-}
-
-// The browser throws NotAllowedError when the person closes the passkey prompt.
-const cancelled = (error) => error?.name === 'NotAllowedError' || error?.name === 'AbortError';
 
 function setupError(message) {
   $('setup-error').textContent = message;
@@ -258,35 +247,15 @@ $('passkey').addEventListener('click', async () => {
   showError('');
   try {
     const start = await send('/api/auth', 'POST', { action: 'passkey_options' });
-    const credential = await passkeyCredential(start.options, false);
+    const credential = await window.fizzPasskey.credential(start.options, false);
     const result = await send('/api/auth', 'POST', { action: 'passkey_sign_in', challenge_id: start.challenge_id, credential });
     showSetup(result.username);
   } catch (error) {
-    if (!cancelled(error)) showError(error instanceof DOMException ? 'That passkey didn’t work. Try again.' : error.message);
+    if (!window.fizzPasskey.cancelled(error)) showError(error instanceof DOMException ? 'That passkey didn’t work. Try again.' : error.message);
   } finally {
     button.disabled = false;
   }
 });
-
-async function addPasskey(button) {
-  const label = button.textContent;
-  button.disabled = true;
-  try {
-    const start = await send('/api/auth', 'POST', { action: 'passkey_add_options' });
-    const credential = await passkeyCredential(start.options, true);
-    await send('/api/auth', 'POST', { action: 'passkey_add', challenge_id: start.challenge_id, credential });
-    button.textContent = 'Passkey added';
-    setTimeout(() => { button.textContent = label; button.disabled = false; }, 4000);
-    return;
-  } catch (error) {
-    if (!cancelled(error)) alert(error instanceof DOMException ? 'That passkey could not be saved. Try again.' : error.message);
-  }
-  button.disabled = false;
-}
-for (const id of ['add-passkey', 'dashboard-passkey']) {
-  $(id).hidden = !passkeysSupported;
-  $(id).addEventListener('click', () => addPasskey($(id)));
-}
 
 $('create-mode').addEventListener('click', () => setMode('create'));
 $('sign-in-mode').addEventListener('click', () => setMode('sign-in'));

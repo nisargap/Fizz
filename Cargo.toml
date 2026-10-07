@@ -22,6 +22,10 @@ name = "auth"
 path = "api/auth.rs"
 
 [[bin]]
+name = "account"
+path = "api/account.rs"
+
+[[bin]]
 name = "session"
 path = "api/session.rs"
 

@@ -170,6 +170,21 @@ impl Supabase {
             serde_json::from_slice(&bytes).unwrap_or(Value::Null),
         ))
     }
+
+    /// Call a Supabase Auth admin endpoint, such as `admin/users/{id}/passkeys`. A legacy
+    /// service_role key is a JWT and must also be the bearer; a newer secret key works as `apikey`
+    /// alone and is rejected as a bearer.
+    pub async fn auth_admin(
+        &self,
+        method: Method,
+        path: &str,
+    ) -> Result<(StatusCode, Value), StoreError> {
+        let bearer = self
+            .service_role_key
+            .starts_with("eyJ")
+            .then_some(self.service_role_key.as_str());
+        self.auth(method, path, &[], bearer, None, None).await
+    }
 }
 
 #[cfg(test)]

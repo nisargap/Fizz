@@ -427,10 +427,36 @@ async fn passkey_add(ctx: &Ctx, token: &str, data: &Value) -> Response<ResponseB
         )
         .await
     {
-        Ok((status, _)) if status.is_success() => reply_with(200, json!({"ok": true}), &[]),
+        Ok((status, passkey)) if status.is_success() => {
+            // Label the passkey with the browser and device the page reported, unless Supabase
+            // already named it. A failed rename still leaves a working passkey.
+            if let (Some(id), None, Some(name)) = (
+                passkey["id"].as_str(),
+                passkey["friendly_name"].as_str(),
+                passkey_name(data),
+            ) {
+                let _ = ctx
+                    .auth(
+                        Method::PATCH,
+                        &format!("passkeys/{id}"),
+                        &[],
+                        Some(token),
+                        Some(json!({"friendly_name": name})),
+                    )
+                    .await;
+            }
+            reply_with(200, json!({"ok": true}), &[])
+        }
         Ok((status, body)) => auth_failure(status, &body),
         Err(response) => response,
     }
+}
+
+/// A short label such as "Chrome on Mac": printable, at most 60 characters.
+fn passkey_name(data: &Value) -> Option<String> {
+    let name = data.get("name").and_then(Value::as_str)?.trim();
+    (!name.is_empty() && name.chars().count() <= 60 && !name.chars().any(char::is_control))
+        .then(|| name.to_owned())
 }
 
 /// The browser's WebAuthn response is passed to Supabase unchanged.
@@ -757,6 +783,18 @@ mod tests {
         assert!(passkey_body(&json!({"challenge_id": "abc", "credential": {"id": "x"}})).is_some());
         assert!(passkey_body(&json!({"challenge_id": "abc", "credential": "x"})).is_none());
         assert!(passkey_body(&json!({"credential": {"id": "x"}})).is_none());
+    }
+
+    #[test]
+    fn passkey_names_are_short_printable_labels() {
+        assert_eq!(
+            passkey_name(&json!({"name": " Chrome on Mac "})).as_deref(),
+            Some("Chrome on Mac")
+        );
+        assert!(passkey_name(&json!({"name": ""})).is_none());
+        assert!(passkey_name(&json!({"name": "a\nb"})).is_none());
+        assert!(passkey_name(&json!({"name": "x".repeat(61)})).is_none());
+        assert!(passkey_name(&json!({})).is_none());
     }
 
     #[test]
