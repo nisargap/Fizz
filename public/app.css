@@ -42,19 +42,17 @@ input::placeholder { color: #7b9daa; }
 .secondary:hover { background: #18394a; }
 .oauth-divider { display: flex; align-items: center; gap: .75rem; color: #7b9daa; font-size: 1.2rem; text-transform: uppercase; letter-spacing: .12em; margin: 1.8rem 0 1rem; }
 .oauth-divider::before, .oauth-divider::after { content: ""; flex: 1; border-top: 2px solid #31546a; }
-/* Sign in with Google must follow Google's branding guidelines (dark theme), so it is the one
-   control on this screen that is not pixel styled. */
-.google-button { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 40px; padding: 0 12px; border: 1px solid #8e918f; border-radius: 20px; background: #131314; color: #e3e3e3; font-family: "Google Sans", Roboto, Arial, sans-serif; font-weight: 500; font-size: 14px; line-height: 20px; letter-spacing: .25px; }
-.google-button:hover { background: #242526; }
-.google-button:active { background: #303132; }
-.google-logo { display: grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; }
-.google-logo svg { display: block; width: 18px; height: 18px; }
+/* Matches the pixel buttons; Google's "G" keeps its standard colors on a white tile. */
+.google-button { display: flex; align-items: center; justify-content: center; gap: .7rem; width: 100%; }
+.google-logo { display: grid; place-items: center; flex: none; width: 1.9rem; height: 1.9rem; background: #fff; box-shadow: 2px 2px 0 #071018; }
+.google-logo svg { display: block; width: 1.3rem; height: 1.3rem; }
 #email-wrap { margin-bottom: 1.6rem; }
 .text-button { margin-right: auto; padding: 0; border: 0; background: none; color: #a9eaf7; text-decoration: underline; text-underline-offset: 4px; font-size: 1.35rem; }
 .text-button:hover { color: #fff; }
 .email-sent { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.4rem; }
 .email-sent .text-button { margin-right: 0; }
 .passkey-button { width: 100%; margin-top: .75rem; }
+.google-button, .passkey-button { height: 3.2rem; padding-block: 0; }
 .legal-note { margin: 1.4rem 0 0; color: #9fbfc8; font-size: 1.2rem; }
 .legal-note a { color: #a9eaf7; }
 @media (max-width: 420px) { .panel { padding: 1.25rem; } .mode-switch button { font-size: 1.2rem; } }
